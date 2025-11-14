@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Advanced MP4 Viewer – Movable Controls</title>
+<title>Advanced MP4 Viewer – Final</title>
 <style>
   html, body {
     margin: 0; padding: 0; height: 100%; background: #000; color: #fff;
@@ -77,16 +77,31 @@
     pointer-events: none;
   }
 
+  /* --- Button Styles (Safari Fix) --- */
   button {
-    background: #222; color: #fff; border: 1px solid #555;
+    background-color: #222; /* More explicit */
+    color: #fff; /* More explicit */
+    border: 1px solid #555;
     border-radius: 6px; padding: 8px 10px; cursor: pointer;
     transition: 0.2s; font-size: 1rem;
+    opacity: 1; /* Ensure not transparent */
   }
-  button:hover { background: #2fa8ff; color: #000; }
+  button:hover { 
+    background-color: #2fa8ff; 
+    color: #000; 
+  }
+  /* Style for active loop button */
+  button.active {
+    background-color: #2fa8ff;
+    color: #000;
+  }
+  
+  /* --- Control Label Styles (Safari Fix) --- */
   .control { 
     display: flex; flex-direction: column; align-items: center; 
     font-size: 0.8rem; min-width: 50px;
     cursor: default;
+    color: #fff; /* Explicitly set label color */
   }
   input[type="range"] {
     cursor: pointer;
@@ -95,7 +110,31 @@
   #speed { width: 180px; }
   #zoom { width: 120px; }
   #zoom-level { font-weight: bold; }
-  datalist { display: flex; justify-content: space-between; color: #aaa; font-size: 0.75rem; }
+  datalist { 
+    display: flex; justify-content: space-between; 
+    color: #fff; /* Explicit datalist color */
+    font-size: 0.75rem; 
+  }
+  
+  /* --- NEW: Prev/Next Buttons --- */
+  .nav-button {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    z-index: 9; /* Below controls */
+    font-size: 2rem;
+    font-weight: bold;
+    padding: 15px 5px;
+    background-color: rgba(0,0,0,0.3);
+    opacity: 0.7;
+    transition: opacity 0.2s;
+  }
+  .nav-button:hover {
+    opacity: 1;
+  }
+  #prev-video { left: 10px; }
+  #next-video { right: 10px; }
+
 
   @media(max-width: 768px){
     .controls-overlay {
@@ -121,12 +160,18 @@
     input[type="range"] { width: 70px; }
     #speed { width: 100px; } 
     #zoom { width: 70px; }
+    
+    /* Hide nav buttons on mobile */
+    .nav-button { display: none; }
   }
 </style>
 </head>
 <body>
   
   <div id="app-wrapper">
+    <button id="prev-video" class="nav-button">&lt;</button>
+    <button id="next-video" class="nav-button">&gt;</button>
+  
     <div id="player-container">
       <video id="video" preload="auto" autoplay muted playsinline crossorigin="anonymous"></video>
       
@@ -140,8 +185,7 @@
       <button id="frameBack">⏪</button>
       <button id="frameForward">⏩</button>
       <button id="fullscreen">⛶</button>
-      
-      <div class="control">
+      <button id="loop">🔁</button> <div class="control">
         <label>Zoom (<span id="zoom-level">1.0</span>x)</label>
         <input type="range" id="zoom" min="1" max="10" step="0.1" value="1" />
       </div>
@@ -179,6 +223,9 @@ const playerContainer = document.getElementById('player-container');
 const timelineContainer = document.getElementById('timeline-container');
 const timelineProgress = document.getElementById('timeline-progress');
 const playPauseButton = document.getElementById('playPause');
+const loopButton = document.getElementById('loop'); // NEW
+const prevButton = document.getElementById('prev-video'); // NEW
+const nextButton = document.getElementById('next-video'); // NEW
 
 let stepping = false;
 let hideTimer;
@@ -303,9 +350,10 @@ controls.addEventListener('mousedown', onControlsDragStart);
 controls.addEventListener('touchstart', onControlsDragStart, { passive: false });
 
 
-// ---- Load video safely ----
-(async function loadVideo() {
-  const url = "https://cs.apac.trusttalk.net/83837/1.3.46.670589.29.18771927773542520251023181930302_1.3.46.670589.29.1877192777354251340570154739598612.mp4";
+// ---- NEW: Reusable function to set video source ----
+async function loadVideoSource(url) {
+  video.pause();
+  playPauseButton.textContent = '▶️';
   try {
     const resp = await fetch(url, {mode:"cors"});
     if (!resp.ok) throw new Error("CORS blocked");
@@ -313,6 +361,15 @@ controls.addEventListener('touchstart', onControlsDragStart, { passive: false })
   } catch {
     video.src = "https://corsproxy.io/?" + encodeURIComponent(url);
   }
+}
+
+// NEW: Expose setSource API to the main window
+window.setSource = loadVideoSource;
+
+// Load initial video
+(async function loadInitialVideo() {
+  const initialUrl = "https://cs.apac.trusttalk.net/83837/1.3.46.670589.29.18771927773542520251023181930302_1.3.46.670589.29.1877192777354251340570172397665262.mp4";
+  await loadVideoSource(initialUrl);
 })();
 
 // ---- Draggable Timeline Controls ----
@@ -398,6 +455,22 @@ video.addEventListener('pause', () => {
   playPauseButton.textContent = '▶️';
 });
 
+// ---- NEW: Loop Control ----
+loopButton.onclick = () => {
+  video.loop = !video.loop;
+  loopButton.classList.toggle('active', video.loop);
+};
+
+// ---- NEW: Prev/Next Controls ----
+prevButton.onclick = () => {
+  const event = new CustomEvent('viewerprev');
+  document.dispatchEvent(event);
+};
+nextButton.onclick = () => {
+  const event = new CustomEvent('viewernext');
+  document.dispatchEvent(event);
+};
+
 // ---- Simple Step (0.25s) ----
 function stepFrame(dir) {
   if (stepping) return;
@@ -441,8 +514,10 @@ let gesture = {
   startX: 0, startY: 0, isDragging: false, isZooming: false,
   dragMode: 'none', startPinchDist: 0,
   lastContrast: filters.contrast, lastSeekTime: video.currentTime,
-  // **NEW**: Track time and movement for tap-to-play
-  startTime: 0, totalDeltaX: 0, totalDeltaY: 0
+  startTime: 0, totalDeltaX: 0, totalDeltaY: 0,
+  // **NEW**: Timer and flag for "hold-to-pan"
+  panTimer: null,
+  panReady: false 
 };
 
 function updateTransform() {
@@ -487,17 +562,24 @@ function onDragStart(e) {
   gesture.lastContrast = filters.contrast;
   gesture.lastSeekTime = video.currentTime;
   
-  // **NEW**: Reset tap-to-play trackers
   gesture.startTime = Date.now();
   gesture.totalDeltaX = 0;
   gesture.totalDeltaY = 0;
   
+  // **NEW: Hold-to-pan logic**
+  clearTimeout(gesture.panTimer); // Clear any old timers
+  gesture.panReady = false;
+  
   if (gesture.scale > 1) {
-    gesture.dragMode = 'pan';
-    video.classList.add('is-panning');
+    // Start a timer. If it fires, pan is ready.
+    gesture.panTimer = setTimeout(() => {
+      gesture.panReady = true;
+    }, 300); // 300ms hold time
+    gesture.dragMode = 'pending'; // Default to pending
   } else {
     gesture.dragMode = 'pending';
   }
+  
   showControls();
   clearTimeout(hideTimer);
   if (e.touches) e.preventDefault();
@@ -509,20 +591,32 @@ function onDragMove(e) {
   }
   if (!gesture.isDragging || gesture.isZooming) return;
   if (e.touches) e.preventDefault();
-
+  
+  // **NEW: Hold-to-pan logic**
+  // If we move before the timer fires, cancel "hold-to-pan"
+  if (!gesture.panReady) {
+    clearTimeout(gesture.panTimer);
+  }
+  
   const coords = getEventCoords(e);
   const deltaX = coords.x - gesture.startX;
   const deltaY = coords.y - gesture.startY;
   
-  // **NEW**: Update total movement for tap check
   gesture.totalDeltaX = deltaX;
   gesture.totalDeltaY = deltaY;
+
+  // **NEW: Check pan readiness**
+  if (gesture.scale > 1 && gesture.panReady) {
+    gesture.dragMode = 'pan'; // Latch into pan mode
+    video.classList.add('is-panning');
+  }
 
   if (gesture.dragMode === 'pan') {
     gesture.x = gesture.lastX + deltaX;
     gesture.y = gesture.lastY + deltaY;
     updateTransform();
   } else {
+    // This is the "simple drag" path
     if (gesture.dragMode === 'pending') {
       if (Math.abs(deltaX) > Math.abs(deltaY)) {
         gesture.dragMode = 'seek';
@@ -552,16 +646,17 @@ function onDragMove(e) {
 }
 
 function onDragEnd(e) {
-  // **NEW**: Check for tap-to-play
+  // **NEW: Clear pan timer**
+  clearTimeout(gesture.panTimer);
+  gesture.panReady = false;
+
   const timeElapsed = Date.now() - gesture.startTime;
   const dragDistance = Math.sqrt(gesture.totalDeltaX * gesture.totalDeltaX + gesture.totalDeltaY * gesture.totalDeltaY);
 
-  // Check for a 'tap' (short duration, minimal movement, not a zoom)
   if (timeElapsed < 250 && dragDistance < 10 && !gesture.isZooming) {
     playPauseButton.click();
   }
 
-  // --- Rest of the function ---
   if (e.touches && e.touches.length > 0) return;
   
   if (gesture.isDragging) {
@@ -581,7 +676,8 @@ function onPinchStart(e) {
   if (!e.touches || e.touches.length !== 2) return;
   e.preventDefault();
   gesture.isZooming = true;
-  gesture.isDragging = false;
+  gesture.isDragging = false; // Stop any pan/seek/contrast
+  clearTimeout(gesture.panTimer); // Cancel pan timer
   gesture.startPinchDist = getPinchDist(e);
   showControls();
   clearTimeout(hideTimer);
@@ -620,14 +716,12 @@ document.addEventListener('touchmove', onDragMove, { passive: false });
 document.addEventListener('touchend', onDragEnd);
 document.addEventListener('touchcancel', onDragEnd);
 
-
 // ---- Auto-hide controls ----
 function showControls() {
   controls.style.opacity = 1;
   timelineContainer.style.opacity = 1;
   clearTimeout(hideTimer);
   hideTimer = setTimeout(()=> {
-    // Don't hide if timeline is being dragged
     if (!video.paused && !stepping && !gesture.isDragging && !gesture.isZooming && !isSeekingTimeline) {
       controls.style.opacity = 0;
       timelineContainer.style.opacity = 0;
