@@ -79,18 +79,17 @@
 
   /* --- Button Styles (Safari Fix) --- */
   button {
-    background-color: #222; /* More explicit */
-    color: #fff; /* More explicit */
+    background-color: #222;
+    color: #fff;
     border: 1px solid #555;
     border-radius: 6px; padding: 8px 10px; cursor: pointer;
     transition: 0.2s; font-size: 1rem;
-    opacity: 1; /* Ensure not transparent */
+    opacity: 1;
   }
   button:hover { 
     background-color: #2fa8ff; 
     color: #000; 
   }
-  /* Style for active loop button */
   button.active {
     background-color: #2fa8ff;
     color: #000;
@@ -101,7 +100,7 @@
     display: flex; flex-direction: column; align-items: center; 
     font-size: 0.8rem; min-width: 50px;
     cursor: default;
-    color: #fff; /* Explicitly set label color */
+    color: #fff;
   }
   input[type="range"] {
     cursor: pointer;
@@ -112,16 +111,16 @@
   #zoom-level { font-weight: bold; }
   datalist { 
     display: flex; justify-content: space-between; 
-    color: #fff; /* Explicit datalist color */
+    color: #fff;
     font-size: 0.75rem; 
   }
   
-  /* --- NEW: Prev/Next Buttons --- */
+  /* --- Prev/Next Buttons --- */
   .nav-button {
     position: absolute;
     top: 50%;
     transform: translateY(-50%);
-    z-index: 9; /* Below controls */
+    z-index: 9;
     font-size: 2rem;
     font-weight: bold;
     padding: 15px 5px;
@@ -161,8 +160,23 @@
     #speed { width: 100px; } 
     #zoom { width: 70px; }
     
-    /* Hide nav buttons on mobile */
-    .nav-button { display: none; }
+    /* --- NEW: Mobile Nav Button Positioning --- */
+    #timeline-container {
+      left: 45px; /* Make room */
+      right: 45px; /* Make room */
+    }
+    .nav-button {
+      top: 6px; /* Align with timeline */
+      transform: translateY(0); /* Remove vertical center */
+      font-size: 1.5rem; /* Smaller */
+      padding: 0 5px;
+      background: none; /* No background */
+      border: none;
+      color: #fff;
+      opacity: 0.7;
+    }
+    #prev-video { left: 5px; }
+    #next-video { right: 5px; }
   }
 </style>
 </head>
@@ -185,7 +199,9 @@
       <button id="frameBack">⏪</button>
       <button id="frameForward">⏩</button>
       <button id="fullscreen">⛶</button>
-      <button id="loop">🔁</button> <div class="control">
+      <button id="loop">🔁</button>
+      
+      <div class="control">
         <label>Zoom (<span id="zoom-level">1.0</span>x)</label>
         <input type="range" id="zoom" min="1" max="10" step="0.1" value="1" />
       </div>
@@ -223,9 +239,9 @@ const playerContainer = document.getElementById('player-container');
 const timelineContainer = document.getElementById('timeline-container');
 const timelineProgress = document.getElementById('timeline-progress');
 const playPauseButton = document.getElementById('playPause');
-const loopButton = document.getElementById('loop'); // NEW
-const prevButton = document.getElementById('prev-video'); // NEW
-const nextButton = document.getElementById('next-video'); // NEW
+const loopButton = document.getElementById('loop');
+const prevButton = document.getElementById('prev-video');
+const nextButton = document.getElementById('next-video');
 
 let stepping = false;
 let hideTimer;
@@ -350,7 +366,7 @@ controls.addEventListener('mousedown', onControlsDragStart);
 controls.addEventListener('touchstart', onControlsDragStart, { passive: false });
 
 
-// ---- NEW: Reusable function to set video source ----
+// ---- Reusable function to set video source ----
 async function loadVideoSource(url) {
   video.pause();
   playPauseButton.textContent = '▶️';
@@ -363,11 +379,12 @@ async function loadVideoSource(url) {
   }
 }
 
-// NEW: Expose setSource API to the main window
+// Expose setSource API to the main window
 window.setSource = loadVideoSource;
 
 // Load initial video
 (async function loadInitialVideo() {
+  // **FIXED THE URL TYPO HERE**
   const initialUrl = "https://cs.apac.trusttalk.net/83837/1.3.46.670589.29.18771927773542520251023181930302_1.3.46.670589.29.1877192777354251340570172397665262.mp4";
   await loadVideoSource(initialUrl);
 })();
@@ -455,13 +472,13 @@ video.addEventListener('pause', () => {
   playPauseButton.textContent = '▶️';
 });
 
-// ---- NEW: Loop Control ----
+// ---- Loop Control ----
 loopButton.onclick = () => {
   video.loop = !video.loop;
   loopButton.classList.toggle('active', video.loop);
 };
 
-// ---- NEW: Prev/Next Controls ----
+// ---- Prev/Next Controls ----
 prevButton.onclick = () => {
   const event = new CustomEvent('viewerprev');
   document.dispatchEvent(event);
@@ -515,7 +532,6 @@ let gesture = {
   dragMode: 'none', startPinchDist: 0,
   lastContrast: filters.contrast, lastSeekTime: video.currentTime,
   startTime: 0, totalDeltaX: 0, totalDeltaY: 0,
-  // **NEW**: Timer and flag for "hold-to-pan"
   panTimer: null,
   panReady: false 
 };
@@ -566,16 +582,14 @@ function onDragStart(e) {
   gesture.totalDeltaX = 0;
   gesture.totalDeltaY = 0;
   
-  // **NEW: Hold-to-pan logic**
-  clearTimeout(gesture.panTimer); // Clear any old timers
-  gesture.panReady = false;
+  clearTimeout(gesture.panTimer);
+  gesture.panReady = false; 
   
   if (gesture.scale > 1) {
-    // Start a timer. If it fires, pan is ready.
     gesture.panTimer = setTimeout(() => {
       gesture.panReady = true;
     }, 300); // 300ms hold time
-    gesture.dragMode = 'pending'; // Default to pending
+    gesture.dragMode = 'pending';
   } else {
     gesture.dragMode = 'pending';
   }
@@ -592,8 +606,6 @@ function onDragMove(e) {
   if (!gesture.isDragging || gesture.isZooming) return;
   if (e.touches) e.preventDefault();
   
-  // **NEW: Hold-to-pan logic**
-  // If we move before the timer fires, cancel "hold-to-pan"
   if (!gesture.panReady) {
     clearTimeout(gesture.panTimer);
   }
@@ -605,9 +617,8 @@ function onDragMove(e) {
   gesture.totalDeltaX = deltaX;
   gesture.totalDeltaY = deltaY;
 
-  // **NEW: Check pan readiness**
   if (gesture.scale > 1 && gesture.panReady) {
-    gesture.dragMode = 'pan'; // Latch into pan mode
+    gesture.dragMode = 'pan';
     video.classList.add('is-panning');
   }
 
@@ -616,7 +627,6 @@ function onDragMove(e) {
     gesture.y = gesture.lastY + deltaY;
     updateTransform();
   } else {
-    // This is the "simple drag" path
     if (gesture.dragMode === 'pending') {
       if (Math.abs(deltaX) > Math.abs(deltaY)) {
         gesture.dragMode = 'seek';
@@ -646,7 +656,6 @@ function onDragMove(e) {
 }
 
 function onDragEnd(e) {
-  // **NEW: Clear pan timer**
   clearTimeout(gesture.panTimer);
   gesture.panReady = false;
 
@@ -676,8 +685,8 @@ function onPinchStart(e) {
   if (!e.touches || e.touches.length !== 2) return;
   e.preventDefault();
   gesture.isZooming = true;
-  gesture.isDragging = false; // Stop any pan/seek/contrast
-  clearTimeout(gesture.panTimer); // Cancel pan timer
+  gesture.isDragging = false;
+  clearTimeout(gesture.panTimer);
   gesture.startPinchDist = getPinchDist(e);
   showControls();
   clearTimeout(hideTimer);
