@@ -1,1197 +1,157 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Advanced MP4 Viewer – Final</title>
-<style>
-  html, body {
-    margin: 0; padding: 0; height: 100%; background: #000; color: #fff;
-    overflow: hidden; 
-  }
-  
-  #app-wrapper {
-    position: relative;
-    width: 100%;
-    height: 100%;
-    background: #000;
-  }
-
-  #player-container {
-    position: relative; width: 100%; height: 100%;
-    display: flex; align-items: center; justify-content: center;
-    overflow: hidden; 
-  }
-  video, #image-viewer {
-    width: 100%; height: auto; max-height: 100%;
-    object-fit: contain; background: #000;
-    transform-origin: center center;
-    transition: transform 0.05s linear;
-    will-change: transform;
-    touch-action: none;
-  }
-  
-  video.can-pan, #image-viewer.can-pan { cursor: grab; }
-  video.is-panning, #image-viewer.is-panning { cursor: grabbing; }
-  video.can-seek { cursor: ew-resize; }
-  video.can-contrast { cursor: ns-resize; }
-
-  .video-only {
-    display: flex;
-  }
-  .image-mode .video-only {
-    display: none !important;
-  }
-  #image-viewer {
-    display: none;
-  }
-  .image-mode #image-viewer {
-    display: block;
-  }
-  .image-mode #video {
-    display: none;
-  }
-  
-  .controls-overlay {
-    position: absolute;
-    bottom: 10px; left: 10px;
-    width: 600px; 
-    height: 115px;
-    max-width: calc(100% - 20px);
-    max-height: calc(100% - 20px);
-    z-index: 10;
-    display: flex; flex-wrap: wrap;
-    gap: 10px;
-    justify-content: center;
-    align-items: center;
-    background: rgba(0,0,0,0.6);
-    padding: 20px 10px 10px 10px;
-    border: 1px solid #555;
-    border-radius: 12px;
-    user-select: none;
-    transition: opacity 0.3s;
-    resize: both;
-    overflow: auto; 
-    cursor: move;
-  }
-  
-  #timeline-container {
-    position: absolute;
-    top: 10px; 
-    left: 10px; right: 10px;
-    height: 14px;
-    background: rgba(100, 100, 100, 0.5);
-    border-radius: 7px;
-    cursor: pointer;
-    z-index: 11;
-    transition: opacity 0.3s;
-  }
-  #timeline-progress {
-    height: 100%; width: 0%;
-    background: #2fa8ff;
-    border-radius: 7px;
-    pointer-events: none;
-  }
-
-  button {
-    background-color: #222;
-    color: #fff;
-    border: 1px solid #555;
-    border-radius: 6px; padding: 8px 10px; cursor: pointer;
-    transition: 0.2s; font-size: 1rem;
-    opacity: 1;
-  }
-  button:hover { 
-    background-color: #2fa8ff; 
-    color: #000; 
-  }
-  button.active {
-    background-color: #2fa8ff;
-    color: #000;
-  }
-  
-  .control { 
-    display: flex; flex-direction: column; align-items: center; 
-    font-size: 0.8rem; min-width: 50px;
-    cursor: default;
-    color: #fff;
-  }
-  input[type="range"] {
-    cursor: pointer;
-  }
-  
-  #speed { width: 180px; }
-  #zoom { width: 120px; }
-  #zoom-level { font-weight: bold; }
-  datalist { 
-    display: flex; justify-content: space-between; 
-    color: #fff;
-    font-size: 0.75rem; 
-  }
-  
-  .nav-button {
-    position: absolute;
-    top: 50%;
-    transform: translateY(-50%);
-    z-index: 9;
-    font-size: 2rem;
-    font-weight: bold;
-    padding: 15px 5px;
-    background-color: rgba(0,0,0,0.3);
-    opacity: 0.7;
-    transition: opacity 0.2s;
-  }
-  .nav-button:hover {
-    opacity: 1;
-  }
-  #prev-video { left: 10px; }
-  #next-video { right: 10px; }
-
-  #icon-tray-left {
-    position: absolute;
-    bottom: 10px;
-    left: 10px;
-    z-index: 12;
-    display: flex;
-    gap: 8px;
-    transition: opacity 0.3s;
-  }
-  #icon-tray-right {
-    position: absolute;
-    bottom: 10px;
-    right: 10px;
-    z-index: 12;
-    display: flex;
-    gap: 8px;
-    transition: opacity 0.3s;
-  }
-  .icon-button {
-    width: 24px;
-    height: 24px;
-    background: rgba(0,0,0,0.5);
-    color: #fff;
-    border: 1px solid #777;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    font-weight: bold;
-    font-size: 0.9rem;
-    user-select: none;
-    font-style: normal;
-  }
-
-  .overlay-modal {
-    position: fixed;
-    top: 0; left: 0;
-    width: 100%; height: 100%;
-    background: rgba(0, 0, 0, 0.85);
-    z-index: 1000;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    opacity: 0;
-    pointer-events: none;
-    transition: opacity 0.3s;
-  }
-  .overlay-modal.visible {
-    opacity: 1;
-    pointer-events: auto;
-  }
-  .overlay-content {
-    background: #222;
-    padding: 20px 25px;
-    border-radius: 12px;
-    color: #fff;
-    max-width: 400px;
-    width: 90%;
-    border: 1px solid #555;
-    max-height: 90vh;
-    display: flex;
-    flex-direction: column;
-  }
-  .gesture-help {
-    display: grid;
-    grid-template-columns: 80px 1fr;
-    gap: 15px;
-    align-items: center;
-    text-align: left;
-    margin-bottom: 20px;
-  }
-  .gesture-help p {
-    margin: 0;
-    font-size: 0.9rem;
-    color: #ddd;
-  }
-  .gesture-help p strong {
-    color: #fff;
-  }
-  .animation-container {
-    width: 80px;
-    height: 80px;
-    position: relative;
-    border: 2px solid #555;
-    border-radius: 8px;
-    background: #111;
-    overflow: hidden;
-  }
-  .finger {
-    width: 20px;
-    height: 20px;
-    background: #2fa8ff;
-    border: 2px solid #fff;
-    border-radius: 50%;
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    box-shadow: 0 0 10px #2fa8ff;
-  }
-  
-  .overlay-footer {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    border-top: 1px solid #444;
-    padding-top: 15px;
-    margin-top: 10px;
-  }
-  .overlay-footer label {
-    font-size: 0.8rem;
-    color: #ccc;
-    display: flex;
-    align-items: center;
-    gap: 5px;
-  }
-  .overlay-footer button {
-    padding: 8px 15px;
-  }
-  
-  #info-header {
-    display: flex;
-    justify-content: flex-end;
-    margin: -10px -15px 10px 0;
-  }
-  #info-close-button {
-    background: none;
-    border: none;
-    color: #aaa;
-    font-size: 1.5rem;
-    line-height: 1;
-  }
-  #info-text-container {
-    overflow-y: auto;
-    font-size: 0.9rem;
-    line-height: 1.5;
-  }
-  #info-text-container p {
-    margin-top: 0;
-  }
-  
-  #terms-overlay .overlay-content {
-    font-size: 0.9rem;
-    line-height: 1.5;
-  }
-  #terms-overlay a {
-    color: #2fa8ff;
-  }
-  #terms-overlay .overlay-footer {
-    justify-content: flex-end;
-  }
-
-  @keyframes tap {
-    0%, 100% { transform: translate(-50%, -50%) scale(1); opacity: 1; }
-    50% { transform: translate(-50%, -50%) scale(0.8); opacity: 0.7; }
-  }
-  #tap-animation .finger {
-    animation: tap 1.5s infinite ease-in-out;
-  }
-  @keyframes drag-seek {
-    0%, 100% { transform: translate(-100%, -50%); }
-    50% { transform: translate(100%, -50%); }
-  }
-  #seek-animation .finger {
-    animation: drag-seek 2.5s infinite ease-in-out;
-  }
-  @keyframes drag-contrast {
-    0%, 100% { transform: translate(-50%, -100%); }
-    50% { transform: translate(-50%, 100%); }
-  }
-  #contrast-animation .finger {
-    animation: drag-contrast 2.5s infinite ease-in-out;
-  }
-  @keyframes pinch-1 {
-    0%, 100% { top: 35%; left: 35%; }
-    50% { top: 20%; left: 20%; }
-  }
-  @keyframes pinch-2 {
-    0%, 100% { top: 65%; left: 65%; }
-    50% { top: 80%; left: 80%; }
-  }
-  #pinch-animation .finger1 {
-    animation: pinch-1 2s infinite ease-in-out;
-  }
-  #pinch-animation .finger2 {
-    animation: pinch-2 2s infinite ease-in-out;
-  }
-  @keyframes hold-pan {
-    0%   { transform: translate(-50%, -50%) scale(1); opacity: 1; }
-    20%  { transform: translate(-50%, -50%) scale(0.8); }
-    40%  { transform: translate(-50%, -50%) scale(0.8); }
-    60%  { transform: translate(-100%, -50%) scale(0.8); }
-    80%  { transform: translate(0%, -50%) scale(0.8); }
-    100% { transform: translate(-50%, -50%) scale(1); opacity: 1; }
-  }
-  #pan-animation .finger {
-    animation: hold-pan 3s infinite ease-in-out;
-  }
-
-
-  @media(max-width: 768px){
-    .controls-overlay {
-      bottom: 5px !important; left: 5px !important; right: 5px !important;
-      top: auto !important; width: auto !important; height: auto !important;
-      resize: none !important; overflow-x: auto !important; overflow-y: hidden !important;
-      flex-wrap: nowrap !important; justify-content: flex-start !important;
-      padding-top: 15px; padding-bottom: 15px;
-      cursor: default !important;
-    }
-    .control {
-      flex-direction: column; min-width: 80px;
-    }
-    input[type="range"] { width: 70px; }
-    #speed { width: 100px; } 
-    #zoom { width: 70px; }
-    
-    #timeline-container {
-      left: 45px; right: 45px;
-    }
-    .nav-button {
-      top: 17px; 
-      transform: translateY(-50%);
-      font-size: 1.5rem; padding: 0 5px;
-      line-height: 1;
-      background: none; border: none; color: #fff; opacity: 0.7;
-    }
-    #prev-video { left: 5px; }
-    #next-video { right: 5px; }
-    
-    #icon-tray-left {
-      bottom: 75px;
-      left: 10px;
-    }
-    #icon-tray-right {
-      bottom: 75px;
-      right: 10px;
-    }
-    
-    #helper-content { max-height: 80vh; overflow-y: auto; }
-  }
-</style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Voice Input Test</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+            background-color: #f4f7f6;
+        }
+        .container {
+            background: white;
+            padding: 2rem;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            text-align: center;
+            width: 90%;
+            max-width: 400px;
+        }
+        .input-wrapper {
+            position: relative;
+            display: flex;
+            align-items: center;
+            margin-top: 20px;
+        }
+        input {
+            width: 100%;
+            padding: 12px 45px 12px 15px;
+            font-size: 16px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            outline: none;
+            transition: border-color 0.3s;
+        }
+        input:focus {
+            border-color: #007bff;
+        }
+        .mic-btn {
+            position: absolute;
+            right: 10px;
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 20px;
+            padding: 5px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #555;
+            transition: transform 0.2s;
+        }
+        .mic-btn:active {
+            transform: scale(0.9);
+        }
+        .listening {
+            color: #d93025;
+            animation: pulse 1.5s infinite;
+        }
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.4; }
+            100% { opacity: 1; }
+        }
+        #status {
+            margin-top: 15px;
+            font-size: 14px;
+            color: #666;
+            min-height: 1.2em;
+        }
+    </style>
 </head>
 <body>
-  
-  <div id="app-wrapper">
-    <button id="prev-video" class="nav-button video-only">&lt;</button>
-    <button id="next-video" class="nav-button video-only">&gt;</button>
-  
-    <div id="player-container">
-      <video id="video" preload="auto" muted playsinline crossorigin="anonymous"></video>
-      <img id="image-viewer" alt="Loaded media" />
-      
-      <div id="timeline-container" class="video-only">
-        <div id="timeline-progress"></div>
-      </div>
-    </div>
 
-    <div class="controls-overlay" id="controls">
-      <button id="playPause" class="video-only">⏸️</button>
-      <button id="frameBack" class="video-only">⏪</button>
-      <button id="frameForward" class="video-only">⏩</button>
-      <button id="fullscreen">⛶</button>
-      <button id="loop" class="video-only">🔁</button>
-      
-      <div class="control">
-        <label>Zoom (<span id="zoom-level">1.0</span>x)</label>
-        <input type="range" id="zoom" min="1" max="10" step="0.1" value="1" />
-      </div>
-      <div class="control">
-        <label>Contrast</label>
-        <input type="range" id="contrast" min="0.5" max="2" step="0.1" value="1" />
-      </div>
-      <div class="control video-only" id="speed-control">
-        <label>Speed</label>
-        <input type="range" id="speed" min="0.25" max="2" step="0.25" value="1" list="speedticks" />
-        <datalist id="speedticks">
-          <option value="0.25" label="¼x"></option>
-          <option value="0.5" label="½x"></option>
-          <option value="1" label="1x"></option>
-          <option value="1.5" label="1½x"></option>
-          <option value="2" label="2x"></option>
-        </datalist>
-      </div>
-      <div class="control">
-        <label>Bright</label>
-        <input type="range" id="brightness" min="0.5" max="2" step="0.1" value="1" />
-      </div>
-      <div class="control">
-        <label>Saturate</label>
-        <input type="range" id="saturate" min="0" max="2" step="0.1" value="1" />
-      </div>
+<div class="container">
+    <h2>Voice Search</h2>
+    <p>Tap the mic and start speaking</p>
+    
+    <div class="input-wrapper">
+        <input type="text" id="output" placeholder="Results will appear here...">
+        <button class="mic-btn" id="start-btn" title="Click to speak">
+            🎤
+        </button>
     </div>
     
-    <div id="icon-tray-left">
-      <div id="helper-icon" class="icon-button">?</div>
-    </div>
-    <div id="icon-tray-right">
-      <div id="info-icon" class="icon-button">i</div>
-    </div>
-  </div>
-
-  <div id="helper-overlay" class="overlay-modal">
-    <div class="overlay-content">
-      <div>
-        <div class="gesture-help">
-          <div class="animation-container" id="tap-animation">
-            <div class="finger"></div>
-          </div>
-          <p><strong>Tap</strong> to Play/Pause (Video only)</p>
-        </div>
-        <div class="gesture-help">
-          <div class="animation-container" id="seek-animation">
-            <div class="finger"></div>
-          </div>
-          <p><strong>Drag Horizontally</strong> to Seek (Video only)</p>
-        </div>
-        <div class="gesture-help">
-          <div class="animation-container" id="contrast-animation">
-            <div class="finger"></div>
-          </div>
-          <p><strong>Drag Vertically</strong> to change Contrast</p>
-        </div>
-        <div class="gesture-help">
-          <div class="animation-container" id="pinch-animation">
-            <div class="finger finger1"></div>
-            <div class="finger finger2"></div>
-          </div>
-          <p><strong>Pinch</strong> to Zoom</p>
-        </div>
-        <div class="gesture-help">
-          <div class="animation-container" id="pan-animation">
-            <div class="finger"></div>
-          </div>
-          <p><strong>Hold & Drag</strong> to Pan (when zoomed)</p>
-        </div>
-      </div>
-      <div class="overlay-footer">
-        <label>
-          <input type="checkbox" id="helper-dont-show">
-          Don't show again
-        </label>
-        <button id="helper-close-button">Got it!</button>
-      </div>
-    </div>
-  </div>
-
-  <div id="info-overlay" class="overlay-modal">
-    <div class="overlay-content">
-      <div id="info-header">
-        <button id="info-close-button">&times;</button>
-      </div>
-      <div id="info-text-container">
-        <p>No study information available.</p>
-      </div>
-    </div>
-  </div>
-
-  <div id="terms-overlay" class="overlay-modal">
-    <div class="overlay-content">
-      <h3>Viewer Terms</h3>
-      <p><strong>This viewer is not for medical diagnostic purposes.</strong></p>
-      <p>This software is provided for informational and convenience purposes only. It is not a certified medical device and should not be used for primary diagnosis, treatment decisions, or any other clinical purposes.</p>
-      <p>By clicking "Accept", you acknowledge that you have read and understood this disclaimer. For more details, please see the <a href="https://trusttalk.net/tos" target="_blank" rel="noopener noreferrer">full terms and conditions</a>.</p>
-      <div class="overlay-footer" style="justify-content: flex-end;">
-        <button id="terms-close-button">Accept</button>
-      </div>
-    </div>
-  </div>
-
+    <div id="status">Ready to listen</div>
+</div>
 
 <script>
-// --- Get all DOM elements ---
-const appWrapper = document.getElementById('app-wrapper');
-const video = document.getElementById('video');
-const imageViewer = document.getElementById('image-viewer');
-const controls = document.getElementById('controls');
-const playerContainer = document.getElementById('player-container');
-const timelineContainer = document.getElementById('timeline-container');
-const timelineProgress = document.getElementById('timeline-progress');
-const playPauseButton = document.getElementById('playPause');
-const loopButton = document.getElementById('loop');
-const prevButton = document.getElementById('prev-video');
-const nextButton = document.getElementById('next-video');
-const zoomSlider = document.getElementById('zoom');
-const zoomLevelLabel = document.getElementById('zoom-level');
-const contrastSlider = document.getElementById('contrast');
-const speedSlider = document.getElementById('speed');
-const brightnessSlider = document.getElementById('brightness');
-const saturateSlider = document.getElementById('saturate');
+    const startBtn = document.getElementById('start-btn');
+    const output = document.getElementById('output');
+    const status = document.getElementById('status');
 
-// Helper elements
-const helperIcon = document.getElementById('helper-icon');
-const helperOverlay = document.getElementById('helper-overlay');
-const helperCloseButton = document.getElementById('helper-close-button');
-const helperDontShowCheckbox = document.getElementById('helper-dont-show');
-const helpStorageKey = 'mp4ViewerShowHelp';
+    // Check for Browser Support
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
 
-// Info elements
-const iconTrayLeft = document.getElementById('icon-tray-left');
-const iconTrayRight = document.getElementById('icon-tray-right');
-const infoIcon = document.getElementById('info-icon');
-const infoOverlay = document.getElementById('info-overlay');
-const infoCloseButton = document.getElementById('info-close-button');
-const infoTextContainer = document.getElementById('info-text-container');
-
-// Terms elements
-const termsOverlay = document.getElementById('terms-overlay');
-const termsCloseButton = document.getElementById('terms-close-button');
-
-// --- Global State Variables ---
-let stepping = false;
-let hideTimer;
-let isSeekingTimeline = false;
-let dragMouseOffset = { x: 0, y: 0 };
-let isImageSource = false;
-
-let controlsState = {};
-const controlsStorageKey = 'mp4ViewerControlsState';
-const filters = { brightness: 1, contrast: 1, saturate: 1 };
-let gesture = {
-  scale: 1, x: 0, y: 0, lastX: 0, lastY: 0,
-  startX: 0, startY: 0, isDragging: false, isZooming: false,
-  dragMode: 'none', startPinchDist: 0,
-  lastContrast: filters.contrast, lastSeekTime: video.currentTime,
-  startTime: 0, totalDeltaX: 0, totalDeltaY: 0,
-  panTimer: null,
-  panReady: false,
-  wasPaused: false
-};
-
-
-// ---- Load & Save Controls Position ----
-function saveControlsState() {
-  if (window.innerWidth <= 768) return;
-  localStorage.setItem(controlsStorageKey, JSON.stringify(controlsState));
-}
-
-function resetControlsPosition() {
-  controlsState = { bottom: '10px', left: '10px', top: 'auto', right: 'auto' };
-  controls.style.bottom = controlsState.bottom;
-  controls.style.left = controlsState.left;
-  controls.style.top = controlsState.top;
-  controls.style.right = controlsState.right;
-}
-
-function loadControlsState() {
-  const savedState = localStorage.getItem(controlsStorageKey);
-  if (savedState && window.innerWidth > 768) {
-    controlsState = JSON.parse(savedState);
-    const winW = window.innerWidth;
-    const winH = window.innerHeight;
-    const top = parseFloat(controlsState.top);
-    const left = parseFloat(controlsState.left);
-
-    if (top > winH - 50 || left > winW - 50 || top < -50 || left < -50) {
-      resetControlsPosition();
+    if (!SpeechRecognition) {
+        status.innerText = "Speech Recognition not supported in this browser.";
+        startBtn.style.display = 'none';
     } else {
-      controls.style.top = controlsState.top || 'auto';
-      controls.style.left = controlsState.left || '10px';
-      controls.style.bottom = controlsState.bottom || '10px';
-      controls.style.right = controlsState.right || 'auto';
-      controls.style.width = controlsState.width || '600px';
-      controls.style.height = controlsState.height || '115px';
-    }
-  } else {
-    resetControlsPosition();
-  }
-}
-loadControlsState();
-
-// ---- ResizeObserver to save size ----
-const controlsResizeObserver = new ResizeObserver(entries => {
-  if (window.innerWidth <= 768) return;
-  const rect = entries[0].contentRect;
-  controlsState.width = `${rect.width}px`;
-  controlsState.height = `${rect.height}px`;
-  saveControlsState();
-});
-controlsResizeObserver.observe(controls);
-
-// ---- Drag logic for controls panel ----
-function onControlsDragStart(e) {
-  if (window.innerWidth <= 768) return;
-  
-  const target = e.target;
-  if (target.closest('button, input, datalist, label, .control')) {
-      return; 
-  }
-  const rect = controls.getBoundingClientRect();
-  if (e.clientX > rect.right - 20 && e.clientY > rect.bottom - 20) {
-      return; 
-  }
-  
-  e.preventDefault();
-  
-  controls.style.bottom = 'auto';
-  controls.style.right = 'auto';
-  controls.style.top = `${rect.top}px`;
-  controls.style.left = `${rect.left}px`;
-  
-  const coords = getEventCoords(e);
-  dragMouseOffset.x = coords.x - rect.left;
-  dragMouseOffset.y = coords.y - rect.top;
-  
-  document.addEventListener('mousemove', onControlsDragMove);
-  document.addEventListener('mouseup', onControlsDragEnd);
-  document.addEventListener('touchmove', onControlsDragMove, { passive: false });
-  document.addEventListener('touchend', onControlsDragEnd);
-}
-
-function onControlsDragMove(e) {
-  e.preventDefault();
-  const coords = getEventCoords(e);
-  
-  let newLeft = coords.x - dragMouseOffset.x;
-  let newTop = coords.y - dragMouseOffset.y;
-  
-  const winW = window.innerWidth;
-  const winH = window.innerHeight;
-  const panelW = controls.offsetWidth;
-  const panelH = controls.offsetHeight;
-  
-  newLeft = Math.max(0, Math.min(newLeft, winW - panelW));
-  newTop = Math.max(0, Math.min(newTop, winH - panelH));
-  
-  controls.style.left = `${newLeft}px`;
-  controls.style.top = `${newTop}px`;
-}
-
-function onControlsDragEnd() {
-  document.removeEventListener('mousemove', onControlsDragMove);
-  document.removeEventListener('mouseup', onControlsDragEnd);
-  document.removeEventListener('touchmove', onControlsDragMove);
-  document.removeEventListener('touchend', onControlsDragEnd);
-  
-  controlsState.top = controls.style.top;
-  controlsState.left = controls.style.left;
-  controlsState.bottom = 'auto';
-  controlsState.right = 'auto';
-  saveControlsState();
-}
-
-controls.addEventListener('mousedown', onControlsDragStart);
-controls.addEventListener('touchstart', onControlsDragStart, { passive: false });
-
-
-// ---- Reusable function to set video source ----
-async function loadVideoSource(url) {
-  zoomSlider.value = 1;
-  filters.brightness = 1;
-  filters.contrast = 1;
-  filters.saturate = 1;
-  brightnessSlider.value = 1;
-  contrastSlider.value = 1;
-  saturateSlider.value = 1;
-  gesture.scale = 1;
-  gesture.x = 0; gesture.y = 0; gesture.lastX = 0; gesture.lastY = 0;
-  updateFilter();
-  updateTransform();
-
-  if (/\.(jpg|jpeg|png|webp)$/i.test(url)) {
-    isImageSource = true;
-    appWrapper.classList.add('image-mode');
-    appWrapper.classList.remove('video-mode');
-    video.pause();
-    
-    imageViewer.src = "https://corsproxy.io/?" + encodeURIComponent(url);
-    
-  } else {
-    isImageSource = false;
-    appWrapper.classList.add('video-mode');
-    appWrapper.classList.remove('image-mode');
-    video.pause();
-    playPauseButton.textContent = '▶️';
-    
-    try {
-      const resp = await fetch(url, {mode:"cors"});
-      if (!resp.ok) throw new Error("CORS blocked");
-      video.src = url;
-    } catch {
-      video.src = "https://corsproxy.io/?" + encodeURIComponent(url);
-    }
-  }
-}
-
-// ---- Expose setSource API to the main window ----
-window.setSource = loadVideoSource;
-
-// ---- Expose setStudyInfo API to the main window ----
-window.setStudyInfo = function(htmlContent) {
-  if (htmlContent) {
-    infoTextContainer.innerHTML = htmlContent;
-  } else {
-    infoTextContainer.innerHTML = "<p>No study information available.</p>";
-  }
-};
-
-// Load initial video
-(async function loadInitialVideo() {
-  const initialUrl = "https://cs.apac.trusttalk.net/83837/1.3.46.670589.29.18771927773542520251023181930302_1.3.46.670589.29.1877192777354251340570172397665262.mp4";
-  await loadVideoSource(initialUrl);
-})();
-
-// ---- Draggable Timeline Controls ----
-video.addEventListener('timeupdate', () => {
-  if (video.duration && !isSeekingTimeline) {
-    const percent = (video.currentTime / video.duration) * 100;
-    timelineProgress.style.width = `${percent}%`;
-  }
-});
-function getTimelinePercent(e) {
-  const bounds = timelineContainer.getBoundingClientRect();
-  const clientX = e.touches ? e.touches[0].clientX : e.clientX;
-  const percent = (clientX - bounds.left) / bounds.width;
-  return Math.max(0, Math.min(1, percent));
-}
-function handleTimelineSeek(e) {
-  if (!video.duration) return;
-  const percent = getTimelinePercent(e);
-  video.currentTime = percent * video.duration;
-  if (gesture.wasPaused) {
-    video.pause();
-  }
-  timelineProgress.style.width = `${percent * 100}%`;
-}
-function onTimelineDragStart(e) {
-  e.preventDefault();
-  isSeekingTimeline = true;
-  gesture.wasPaused = video.paused;
-  handleTimelineSeek(e);
-  document.addEventListener('mousemove', onTimelineDragMove);
-  document.addEventListener('mouseup', onTimelineDragEnd);
-  document.addEventListener('touchmove', onTimelineDragMove, { passive: false });
-  document.addEventListener('touchend', onTimelineDragEnd);
-}
-function onTimelineDragMove(e) {
-  if (!isSeekingTimeline) return;
-  e.preventDefault();
-  handleTimelineSeek(e);
-}
-function onTimelineDragEnd() {
-  isSeekingTimeline = false;
-  gesture.wasPaused = false;
-  document.removeEventListener('mousemove', onTimelineDragMove);
-  document.removeEventListener('mouseup', onTimelineDragEnd);
-  document.removeEventListener('touchmove', onTimelineDragMove);
-  document.removeEventListener('touchend', onTimelineDragEnd);
-}
-timelineContainer.addEventListener('mousedown', onTimelineDragStart);
-timelineContainer.addEventListener('touchstart', onTimelineDragStart, { passive: false });
-
-// ---- Filters ----
-function updateFilter() {
-  const filterString = `brightness(${filters.brightness}) contrast(${filters.contrast}) saturate(${filters.saturate})`;
-  video.style.filter = filterString;
-  imageViewer.style.filter = filterString;
-}
-brightnessSlider.addEventListener("input",e=>{
-  filters.brightness=e.target.value; updateFilter();
-});
-contrastSlider.addEventListener("input",e=>{
-  filters.contrast=e.target.value; updateFilter();
-});
-saturateSlider.addEventListener("input",e=>{
-  filters.saturate=e.target.value; updateFilter();
-});
-
-// ---- Speed slider ----
-speedSlider.addEventListener('input', e => {
-  const step = Math.round(e.target.value * 4) / 4;
-  e.target.value = step;
-  video.playbackRate = step;
-});
-
-// ---- Play / Pause ----
-playPauseButton.onclick = () => {
-  if (video.paused) {
-    video.play().catch(e => console.error("Play error:", e));
-  } else {
-    video.pause();
-  }
-  showControls();
-};
-
-// **FIX: This is the new guard**
-video.addEventListener('play', () => {
-  playPauseButton.textContent = '⏸️';
-  // Check if this play event was triggered by a seek
-  if ((isSeekingTimeline || (gesture.isDragging && gesture.dragMode === 'seek')) && gesture.wasPaused) {
-    video.pause(); // Re-pause immediately
-  }
-});
-video.addEventListener('pause', () => {
-  playPauseButton.textContent = '▶️';
-});
-
-// ---- Loop Control ----
-loopButton.onclick = () => {
-  video.loop = !video.loop;
-  loopButton.classList.toggle('active', video.loop);
-};
-
-// ---- Prev/Next Controls ----
-prevButton.onclick = () => {
-  const event = new CustomEvent('viewerprev');
-  document.dispatchEvent(event);
-};
-nextButton.onclick = () => {
-  const event = new CustomEvent('viewernext');
-  document.dispatchEvent(event);
-};
-
-// ---- Simple Step (0.25s) ----
-function stepFrame(dir) {
-  if (stepping) return;
-  stepping = true;
-  video.pause();
-  showControls();
-  const onSeeked = () => {
-    video.removeEventListener('seeked', onSeeked);
-    video.removeEventListener('error', onSeeked);
-    stepping = false;
-  };
-  video.addEventListener('seeked', onSeeked);
-  video.addEventListener('error', onSeeked);
-  const offset = dir * 0.25;
-  let target = Math.max(0, video.currentTime + offset);
-  if (target >= video.duration) target = video.duration;
-  video.currentTime = target;
-}
-document.getElementById('frameForward').onclick = () => stepFrame(1);
-document.getElementById('frameBack').onclick = () => stepFrame(-1);
-
-// ---- Fullscreen ----
-document.getElementById('fullscreen').onclick = ()=>{
-  if(!document.fullscreenElement) {
-    appWrapper.requestFullscreen();
-  } else {
-    document.exitFullscreen();
-  }
-};
-document.addEventListener('fullscreenchange', () => {
-  if (!document.fullscreenElement) {
-    showControls();
-  }
-});
-
-// ---- Zoom, Pan, & Gesture State ----
-function updateTransform() {
-  const transformString = `translate(${gesture.x}px, ${gesture.y}px) scale(${gesture.scale})`;
-  video.style.transform = transformString;
-  imageViewer.style.transform = transformString;
-}
-
-zoomSlider.addEventListener('input', e => {
-  gesture.scale = parseFloat(e.target.value);
-  zoomLevelLabel.textContent = gesture.scale.toFixed(1);
-  if (gesture.scale <= 1) {
-    gesture.x = 0; gesture.y = 0;
-    gesture.lastX = 0; gesture.lastY = 0;
-    video.classList.remove('can-pan');
-    imageViewer.classList.remove('can-pan');
-  } else {
-    video.classList.add('can-pan');
-    imageViewer.classList.add('can-pan');
-  }
-  updateTransform();
-});
-
-function getEventCoords(e) {
-  return e.touches ? { x: e.touches[0].clientX, y: e.touches[0].clientY } : { x: e.clientX, y: e.clientY };
-}
-function getPinchDist(e) {
-  const dx = e.touches[0].clientX - e.touches[1].clientX;
-  const dy = e.touches[0].clientY - e.touches[1].clientY;
-  return Math.sqrt(dx * dx + dy * dy);
-}
-
-function onDragStart(e) {
-  if (e.touches && e.touches.length === 2) {
-    onPinchStart(e); return;
-  }
-  if (gesture.isZooming) return;
-  
-  gesture.isDragging = true;
-  const coords = getEventCoords(e);
-  gesture.startX = coords.x;
-  gesture.startY = coords.y;
-  gesture.lastX = gesture.x;
-  gesture.lastY = gesture.y;
-  gesture.lastContrast = filters.contrast;
-  gesture.lastSeekTime = video.currentTime;
-  gesture.wasPaused = video.paused;
-  
-  gesture.startTime = Date.now();
-  gesture.totalDeltaX = 0;
-  gesture.totalDeltaY = 0;
-  
-  clearTimeout(gesture.panTimer);
-  gesture.panReady = false; 
-  
-  if (gesture.scale > 1) {
-    gesture.panTimer = setTimeout(() => {
-      gesture.panReady = true;
-    }, 300);
-    gesture.dragMode = 'pending';
-  } else {
-    if (isImageSource) {
-      gesture.dragMode = 'none';
-    } else {
-      gesture.dragMode = 'pending';
-    }
-  }
-  
-  showControls();
-  clearTimeout(hideTimer);
-  if (e.touches) e.preventDefault();
-}
-
-function onDragMove(e) {
-  if (e.touches && e.touches.length === 2) {
-    onPinchMove(e); return;
-  }
-  if (!gesture.isDragging || gesture.isZooming) return;
-  if (e.touches) e.preventDefault();
-  
-  if (!gesture.panReady) {
-    clearTimeout(gesture.panTimer);
-  }
-  
-  const coords = getEventCoords(e);
-  const deltaX = coords.x - gesture.startX;
-  const deltaY = coords.y - gesture.startY;
-  
-  gesture.totalDeltaX = deltaX;
-  gesture.totalDeltaY = deltaY;
-
-  if (gesture.scale > 1 && gesture.panReady) {
-    gesture.dragMode = 'pan';
-    video.classList.add('is-panning');
-    imageViewer.classList.add('is-panning');
-  }
-
-  if (gesture.dragMode === 'pan') {
-    gesture.x = gesture.lastX + deltaX;
-    gesture.y = gesture.lastY + deltaY;
-    updateTransform();
-  } else {
-    if (gesture.dragMode === 'pending') {
-      if (Math.abs(deltaX) > Math.abs(deltaY)) {
-        gesture.dragMode = 'seek';
-        video.classList.add('can-seek');
-      } else {
-        gesture.dragMode = 'contrast';
-        video.classList.add('can-contrast');
-      }
-    }
-    
-    if (!isImageSource) {
-      if (gesture.dragMode === 'seek') {
-        const seekAmount = (deltaX / window.innerWidth) * 20; 
-        const newTime = Math.max(0, Math.min(video.duration, gesture.lastSeekTime + seekAmount));
-        video.currentTime = newTime;
-        // **FIX**: Removed explicit pause, 'play' event guard will handle it
+        const recognition = new SpeechRecognition();
         
-        if (video.duration) {
-          timelineProgress.style.width = `${(newTime / video.duration) * 100}%`;
-        }
-        
-      } else if (gesture.dragMode === 'contrast') {
-        const contrastChange = -(deltaY / window.innerHeight) * 1.5;
-        const newContrast = Math.max(0.5, Math.min(2, gesture.lastContrast + contrastChange));
-        filters.contrast = newContrast;
-        contrastSlider.value = newContrast;
-        updateFilter();
-      }
+        // Settings
+        recognition.lang = 'en-US';
+        recognition.interimResults = false;
+        recognition.maxAlternatives = 1;
+
+        startBtn.addEventListener('click', () => {
+            try {
+                recognition.start();
+                console.log('Recognition started'); // Keep logging per instructions
+            } catch (e) {
+                console.error('Recognition error or already started:', e);
+            }
+        });
+
+        recognition.onstart = () => {
+            startBtn.classList.add('listening');
+            status.innerText = "Listening...";
+        };
+
+        recognition.onspeechend = () => {
+            recognition.stop();
+            startBtn.classList.remove('listening');
+            status.innerText = "Processing...";
+        };
+
+        recognition.onresult = (event) => {
+            const transcript = event.results[0][0].transcript;
+            output.value = transcript;
+            status.innerText = "Done!";
+            console.log('Result received:', transcript); 
+        };
+
+        recognition.onerror = (event) => {
+            startBtn.classList.remove('listening');
+            status.innerText = "Error occurred: " + event.error;
+            console.error('Speech recognition error event:', event.error);
+        };
+
+        recognition.onend = () => {
+            startBtn.classList.remove('listening');
+            if (status.innerText === "Listening...") {
+                status.innerText = "Stopped listening.";
+            }
+        };
     }
-  }
-}
-
-function onDragEnd(e) {
-  clearTimeout(gesture.panTimer);
-  gesture.panReady = false;
-
-  const timeElapsed = Date.now() - gesture.startTime;
-  const dragDistance = Math.sqrt(gesture.totalDeltaX * gesture.totalDeltaX + gesture.totalDeltaY * gesture.totalDeltaY);
-
-  if (timeElapsed < 250 && dragDistance < 10 && !gesture.isZooming) {
-    if (!isImageSource) {
-      playPauseButton.click();
-    }
-  }
-
-  if (e.touches && e.touches.length > 0) return;
-  
-  if (gesture.isDragging) {
-    if (gesture.dragMode === 'pan') {
-      gesture.lastX = gesture.x;
-      gesture.lastY = gesture.y;
-    }
-  }
-  gesture.isDragging = false;
-  gesture.isZooming = false;
-  gesture.dragMode = 'none';
-  gesture.wasPaused = false; // **FIX**
-  video.classList.remove('is-panning', 'can-seek', 'can-contrast');
-  imageViewer.classList.remove('is-panning');
-  showControls();
-}
-
-function onPinchStart(e) {
-  if (!e.touches || e.touches.length !== 2) return;
-  e.preventDefault();
-  gesture.isZooming = true;
-  gesture.isDragging = false;
-  clearTimeout(gesture.panTimer);
-  gesture.startPinchDist = getPinchDist(e);
-  showControls();
-  clearTimeout(hideTimer);
-}
-
-function onPinchMove(e) {
-  if (!e.touches || e.touches.length !== 2 || !gesture.isZooming) return;
-  e.preventDefault();
-  
-  const newDist = getPinchDist(e);
-  const scaleChange = newDist / gesture.startPinchDist;
-  
-  let newScale = gesture.scale * scaleChange;
-  newScale = Math.max(1, Math.min(10, newScale));
-  
-  gesture.scale = newScale;
-  zoomSlider.value = newScale;
-  zoomLevelLabel.textContent = newScale.toFixed(1);
-
-  if (newScale <= 1) {
-    gesture.x = 0; gesture.y = 0;
-    gesture.lastX = 0; gesture.lastY = 0;
-    video.classList.remove('can-pan');
-    imageViewer.classList.remove('can-pan');
-  } else {
-    video.classList.add('can-pan');
-    imageViewer.classList.add('can-pan');
-  }
-  updateTransform();
-  gesture.startPinchDist = newDist;
-}
-
-video.addEventListener('mousedown', onDragStart);
-imageViewer.addEventListener('mousedown', onDragStart);
-document.addEventListener('mousemove', onDragMove);
-document.addEventListener('mouseup', onDragEnd);
-video.addEventListener('touchstart', onDragStart, { passive: false });
-imageViewer.addEventListener('touchstart', onDragStart, { passive: false });
-document.addEventListener('touchmove', onDragMove, { passive: false });
-document.addEventListener('touchend', onDragEnd);
-document.addEventListener('touchcancel', onDragEnd);
-
-
-// ---- Auto-hide controls ----
-function showControls() {
-  controls.style.opacity = 1;
-  iconTrayLeft.style.opacity = 1;
-  iconTrayRight.style.opacity = 1;
-  if (!isImageSource) {
-    timelineContainer.style.opacity = 1;
-  }
-  clearTimeout(hideTimer);
-  hideTimer = setTimeout(()=> {
-    if ((!video.paused || isImageSource) && !stepping && !gesture.isDragging && !gesture.isZooming && !isSeekingTimeline) {
-      controls.style.opacity = 0;
-      timelineContainer.style.opacity = 0;
-      iconTrayLeft.style.opacity = 0;
-      iconTrayRight.style.opacity = 0;
-    }
-  }, 2500);
-}
-document.addEventListener('mousemove', showControls);
-document.addEventListener('touchstart', showControls, { passive: true });
-video.addEventListener('pause', showControls);
-video.addEventListener('play', showControls);
-showControls();
-
-// ---- Helper Overlay Logic ----
-function showHelperOverlay() {
-  helperOverlay.classList.add('visible');
-}
-function hideHelperOverlay() {
-  if (helperDontShowCheckbox.checked) {
-    localStorage.setItem(helpStorageKey, 'false');
-  }
-  helperOverlay.classList.remove('visible');
-}
-
-helperIcon.addEventListener('click', showHelperOverlay);
-helperCloseButton.addEventListener('click', hideHelperOverlay);
-
-// ---- Info Overlay Logic ----
-function showInfoOverlay() {
-  infoOverlay.classList.add('visible');
-}
-function hideInfoOverlay() {
-  infoOverlay.classList.remove('visible');
-}
-
-infoIcon.addEventListener('click', showInfoOverlay);
-infoCloseButton.addEventListener('click', hideInfoOverlay);
-
-// ---- Terms Overlay Logic ----
-function showTermsOverlay() {
-  termsOverlay.classList.add('visible');
-}
-function hideTermsOverlay() {
-  termsOverlay.classList.remove('visible');
-  // NOW check if we should show the helper
-  if (localStorage.getItem(helpStorageKey) !== 'false') {
-    showHelperOverlay();
-  }
-}
-termsCloseButton.addEventListener('click', hideTermsOverlay);
-
-// Show T&C on load
-showTermsOverlay();
-
-
-// ---- Keyboard shortcuts ----
-document.addEventListener('keydown',e=>{
-  if (e.target.type === 'range') return;
-  switch(e.key){
-    case ' ': 
-      e.preventDefault(); 
-      if (!isImageSource) playPauseButton.click();
-      break;
-    case 'ArrowRight': 
-      if (!isImageSource) stepFrame(1); 
-      break;
-    case 'ArrowLeft': 
-      if (!isImageSource) stepFrame(-1); 
-      break;
-    case 'f': document.getElementById('fullscreen').click(); break;
-  }
-});
-
-video.addEventListener("canplay",()=>video.play().catch(()=>{}));
 </script>
+
 </body>
 </html>
