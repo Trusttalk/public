@@ -18,11 +18,11 @@
         }
         .dad-header { 
             text-align: center; 
-            font-size: 4.5em; 
+            font-size: 3em; 
             font-weight: 900; 
             color: #1a202c; 
             margin-bottom: 5px; 
-            border-bottom: 8px solid #2d3748;
+            border-bottom: 10px solid #2d3748;
             padding-bottom: 15px;
         }
         .sub-title { 
@@ -33,86 +33,84 @@
             text-transform: uppercase; 
             letter-spacing: 4px;
         }
-        h2 { 
-            background: #2d3748; 
-            color: white; 
-            padding: 12px 20px; 
-            border-radius: 4px; 
-            margin-top: 50px; 
-        }
-        h3 { 
-            color: #2b6cb0; 
-            border-bottom: 2px solid #e2e8f0; 
-            padding-bottom: 8px; 
-            margin-top: 30px; 
-        }
-        .criteria-box { 
-            background: #f8fafc; 
-            border: 2px solid #2b6cb0; 
-            padding: 25px; 
-            border-radius: 10px; 
-            margin: 20px 0; 
-        }
-        .grid-container { 
-            display: grid; 
-            grid-template-columns: 1fr 1fr; 
-            gap: 20px; 
-            margin: 20px 0; 
-        }
-        .card { 
-            padding: 20px; 
-            border-radius: 8px; 
-            border: 1px solid #cbd5e0; 
-            background: #fff;
-        }
-        .valid { border-left: 10px solid #48bb78; background: #f0fff4; }
-        .invalid { border-left: 10px solid #f56565; background: #fff5f5; }
+        h2 { background: #2d3748; color: white; padding: 12px 20px; border-radius: 4px; margin-top: 50px; }
+        h3 { color: #2b6cb0; border-bottom: 2px solid #e2e8f0; padding-bottom: 8px; margin-top: 30px; }
         
-        table { width: 100%; border-collapse: collapse; margin-top: 30px; font-size: 0.95em; }
-        th { background: #2d3748; color: white; padding: 15px; text-align: left; border: 1px solid #2d3748; }
-        td { padding: 12px; border: 1px solid #e2e8f0; vertical-align: top; }
-        tr:nth-child(even) { background: #f7fafc; }
+        .criteria-box { background: #f8fafc; border: 2px solid #2b6cb0; padding: 25px; border-radius: 10px; margin: 20px 0; }
+        .grid-container { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin: 20px 0; }
+        .card { padding: 20px; border-radius: 8px; border: 1px solid #cbd5e0; background: #fff; position: relative; }
         
-        .logic-pass { color: #2f855a; font-weight: bold; }
-        .logic-fail { color: #c53030; font-weight: bold; }
+        /* TABLE STYLING */
+        table { width: 100%; border-collapse: collapse; margin-top: 30px; font-size: 0.95em; table-layout: fixed; }
+        th { background: #2d3748; color: white; padding: 15px; text-align: left; }
+        td { padding: 0; border: 1px solid #e2e8f0; position: relative; height: 110px; vertical-align: middle; }
+        .prob-col { padding: 15px; font-weight: bold; font-size: 1.1em; }
+        .num-col { text-align: center; width: 50px; }
 
-        .cheat-sheet { 
-            display: grid; 
-            grid-template-columns: repeat(2, 1fr); 
-            gap: 15px; 
-            margin: 20px 0; 
+        /* INTERACTIVE LOGIC */
+        .interactive-wrapper { position: relative; width: 100%; height: 100%; min-height: 110px; cursor: pointer; overflow: hidden; }
+        .reveal-btn {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background-color: #ebf8ff; color: #2b6cb0;
+            display: flex; align-items: center; justify-content: center;
+            font-weight: bold; border: none; outline: none; z-index: 2;
+            transition: opacity 0.1s; user-select: none; -webkit-user-select: none;
         }
-        .cheat-box { 
-            background: #edf2f7; 
-            padding: 15px; 
-            border-radius: 6px; 
-            border: 1px solid #cbd5e0; 
+        .logic-content {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            padding: 15px; display: flex; flex-direction: column; align-items: flex-start; justify-content: center; 
+            z-index: 1; background: #f0fff4; box-sizing: border-box; overflow-y: auto; text-align: left;
         }
+        
+        /* VERTICAL STACKING FOR ANSWERS */
+        .logic-pass, .logic-fail { 
+            display: block; 
+            font-weight: bold; 
+            text-transform: uppercase; 
+            font-size: 1.05em;
+            margin-bottom: 8px; 
+            border-bottom: 2px solid rgba(0,0,0,0.1);
+            padding-bottom: 4px;
+            width: 100%;
+        }
+        .logic-pass { color: #2f855a; }
+        .logic-fail { color: #c53030; }
+        .reason {
+            display: block;
+            color: #2d3748;
+            font-size: 0.95em;
+            line-height: 1.5;
+        }
+
+        .cheat-sheet { display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; margin: 20px 0; }
+        .cheat-box { background: #edf2f7; padding: 15px; border-radius: 6px; border: 1px solid #cbd5e0; }
+
         @media print {
-            body { padding: 20px; }
-            h2, .criteria-box, table, .card { page-break-inside: avoid; }
+            .reveal-btn { display: none !important; }
+            .logic-content { position: static; display: flex; background: none; }
+            td { height: auto; }
         }
     </style>
 </head>
 <body>
 
     <div class="dad-header">For Zahra, with love from dad</div>
-    <div class="sub-title">The Foundation of Algebraic Logic</div>
+    <div class="sub-title">Algebra Logic Master Guide</div>
 
     <h2>I. Sign Ownership: Who "Owns" the Sign?</h2>
-    <p>In algebra, signs are not just operations (plus or minus); they are <strong>identities</strong> that stay with the number.</p>
+    <p>In algebra, signs are not just "plus" or "minus" operations; they are part of the number's identity.</p>
     
     <div class="criteria-box">
-        <strong>The Criteria for Sign Belonging:</strong>
+        <strong>The Rules of Sign Ownership:</strong>
         <ol>
-            <li><strong>The "To the Right" Rule:</strong> A sign always belongs to the number or variable immediately to its <strong>right</strong>.</li>
-            <li><strong>Invisible Positive:</strong> If a number is at the very start of a line and has no sign, it is always a <strong>Positive (+)</strong>.</li>
-            <li><strong>The Bracket Shield:</strong> A sign outside a bracket belongs to the <em>entire unit</em> inside.</li>
+            <li><strong>The "Right-Hand" Rule:</strong> A sign always belongs to the number or variable immediately to its <strong>right</strong>.</li>
+            <li><strong>The Invisible Positive:</strong> If a number is at the start of an expression with no sign, it is secretly <strong>Positive (+)</strong>.</li>
+            <li><strong>The Bracket Shield:</strong> A sign outside a bracket belongs to the <strong>entire</strong> result of the bracket.</li>
         </ol>
     </div>
 
     <div class="grid-container">
-        <div class="card valid">
+        <div class="card">
             <strong>Correct Identification:</strong>
             <p>\[a - b + c\]</p>
             <ul>
@@ -121,183 +119,193 @@
                 <li>The \(c\) is <strong>Positive</strong></li>
             </ul>
         </div>
-        <div class="card invalid">
-            <strong>Negative Example (Common Mistake):</strong>
+        <div class="card" style="border-left: 10px solid #f56565; background: #fff5f5;">
+            <strong>The Trap:</strong>
             <p>\[10 - 2 + 5\]</p>
-            <p><span class="logic-fail">Wrong Thinking:</span> "I see \(2+5\), so that's \(7\). Then \(10-7=3\)."</p>
-            <p><span class="logic-pass">Correct Logic:</span> The sign belongs to the \(2\). It is a <strong>Negative 2</strong>. The sum is \(10 - 2\) which is \(8\), then \(8 + 5 = 13\).</p>
+            <p><strong>Wrong Thinking:</strong> Doing \(2 + 5 = 7\) then \(10 - 7 = 3\).</p>
+            <p><strong>Right Thinking:</strong> The minus belongs to the 2. It is \(10 - 2 = 8\), then \(8 + 5 = 13\).</p>
         </div>
     </div>
+
+    <h2>II. How Signs Work (Addition vs. Multiplication)</h2>
     
-
-[Image of signs on a number line]
-
-
-    <h2>II. Operations with Signs: The "Why"</h2>
-    
-    <h3>1. Multiplication & Division</h3>
-    <div class="criteria-box">
-        <strong>The Rule:</strong> Same signs = Positive (+). Different signs = Negative (-).<br>
-        <strong>The "Why":</strong> Multiplication is about <strong>Direction</strong>.
-        <ul>
-            <li>A <strong>Positive</strong> sign means "Keep the same direction."</li>
-            <li>A <strong>Negative</strong> sign means "Flip the direction."</li>
-            <li>Flipping twice (\(- \times -\)) brings you back to the start (Positive).</li>
-        </ul>
-    </div>
-
-    <h3>2. Addition & Subtraction</h3>
-    <div class="criteria-box">
-        <strong>The Rule:</strong> 
-        <ul>
-            <li>Same signs: Add the values, keep the sign.</li>
-            <li>Different signs: Find the difference, keep the sign of the larger absolute value.</li>
-        </ul>
-        <strong>The "Why":</strong> Addition is about <strong>Position</strong> on a number line.
-        <ul>
-            <li>\(+10 - 12\) means "Go 10 steps Right, then 12 steps Left." You end at \(-2\).</li>
-        </ul>
-    </div>
-    
-
-    <h2>III. Identifying the Structure: Terms vs. Factors</h2>
     <div class="grid-container">
         <div class="card">
-            <h3>The Factor (Loose)</h3>
-            <p>A component linked by <strong>multiplication</strong>.</p>
-            <strong>Criteria:</strong>
+            <h3>1. Multiplication & Division (The "Why")</h3>
+            <p>Multiplication is about <strong>Direction</strong>.</p>
             <ul>
-                <li>Connected by touching or brackets.</li>
-                <li>Must multiply the <em>entire</em> group to be cancelled.</li>
+                <li><strong>Positive:</strong> "Keep going the same way."</li>
+                <li><strong>Negative:</strong> "Flip the direction."</li>
             </ul>
+            <p><em>Example:</em> \(- \times -\) means "Flip the direction, then flip it again." You end up back where you started: <strong>Positive</strong>.</p>
         </div>
         <div class="card">
-            <h3>The Term (Glued)</h3>
-            <p>A component linked by <strong>addition or subtraction</strong>.</p>
-            <strong>Criteria:</strong>
+            <h3>2. Addition & Subtraction (The "Why")</h3>
+            <p>Addition is about <strong>Position</strong> on a number line.</p>
             <ul>
-                <li>Separated by \(+\) or \(-\) signs.</li>
-                <li>Cannot be cancelled individually from a unit.</li>
+                <li><strong>Same Signs:</strong> You are moving further in the same direction. (Add the values).</li>
+                <li><strong>Different Signs:</strong> You are moving in two opposite directions. The "stronger" number wins the sign.</li>
             </ul>
+        </div>
+    </div>
+
+    <h2>III. Terms vs. Factors (The "Glue" Test)</h2>
+    <p>This determines whether you can "collapse" a fraction or not.</p>
+
+    <div class="grid-container">
+        <div class="card" style="border-top: 5px solid #2b6cb0;">
+            <h3>The Factor (Loose)</h3>
+            <p>Linked by <strong>Multiplication</strong>. These are "unhooked" pieces. You can cancel a factor if it multiplies the <strong>entire</strong> numerator/denominator.</p>
+        </div>
+        <div class="card" style="border-top: 5px solid #e53e3e;">
+            <h3>The Term (Glued)</h3>
+            <p>Linked by <strong>Addition or Subtraction</strong>. These are "glued" units. You cannot pull a single number out of a sum to cancel it.</p>
         </div>
     </div>
 
     <h2>IV. Criteria for Cancellation</h2>
     <div class="criteria-box">
-        <strong>Requirements for Cancellation:</strong>
+        <strong>Cancellation Requirements:</strong>
         <ol>
-            <li>The number must be a <strong>Factor</strong> (multiplying the whole numerator/denominator).</li>
-            <li>There must be an <strong>Exact Match</strong> (Sign and Value).</li>
-            <li>Units (Polynomials) must be cancelled as a <strong>whole bracket</strong>.</li>
+            <li>The component must be a <strong>Factor</strong> (Multiplied by the whole top/bottom).</li>
+            <li>There must be an <strong>Exact Match</strong> (Value AND Sign).</li>
+            <li><strong>Polynomial Units:</strong> Any part with a \(+\) or \(-\) must be cancelled as a <strong>whole bracket</strong>.</li>
         </ol>
     </div>
 
     <div class="grid-container">
-        <div class="card valid">
-            <strong>Positive Example (Factor):</strong>
+        <div class="card" style="border-left: 8px solid #48bb78;">
+            <strong>Positive Example (Valid):</strong>
             \[\frac{5(x+1)}{5} = x+1\]
-            <span class="logic-pass">Why:</span> 5 is a factor multiplying the whole top.
+            <span style="color: #2f855a; font-weight: bold; display: block; margin-top: 10px;">Why:</span> 5 is a factor multiplying the whole top.
         </div>
-        <div class="card invalid">
-            <strong>Negative Example (Term):</strong>
+        <div class="card" style="border-left: 8px solid #f56565;">
+            <strong>Negative Example (Invalid):</strong>
             \[\frac{5+x+1}{5}\]
-            <span class="logic-fail">Why Not:</span> 5 is a term. It is "glued" to the \(x\) by a plus sign.
+            <span style="color: #c53030; font-weight: bold; display: block; margin-top: 10px;">Why Not:</span> 5 is a term (glued by +). You cannot pull it out.
         </div>
     </div>
 
     <h2>V. Criteria for using LCM</h2>
     <div class="criteria-box">
-        <strong>When to use LCM:</strong>
+        <strong>The LCM Trigger:</strong>
         <ol>
-            <li>Operation is <strong>Addition (+)</strong> or <strong>Subtraction (-)</strong>.</li>
-            <li>There are <strong>separate</strong> fraction bars.</li>
+            <li>The operation is <strong>Addition (+)</strong> or <strong>Subtraction (-)</strong>.</li>
+            <li>There are <strong>separate</strong> fractions.</li>
             <li>Denominators are <strong>different</strong>.</li>
         </ol>
     </div>
 
     <div class="grid-container">
-        <div class="card valid">
-            <strong>Positive Example (LCM):</strong>
-            \[\frac{a}{2} + \frac{b}{3} = \frac{3a + 2b}{6}\]
-            <span class="logic-pass">Why:</span> Addition between two fractions.
+        <div class="card" style="border-left: 8px solid #48bb78;">
+            <strong>Positive (Need LCM):</strong>
+            \[\frac{a}{2} + \frac{b}{3} = \frac{3a+2b}{6}\]
         </div>
-        <div class="card invalid">
-            <strong>Negative Example (No LCM):</strong>
+        <div class="card" style="border-left: 8px solid #f56565;">
+            <strong>Negative (No LCM):</strong>
             \[\frac{a}{2} \cdot \frac{b}{3} = \frac{ab}{6}\]
-            <span class="logic-fail">Why Not:</span> Multiplication does not use LCM. Just multiply across.
+            <p><em>(Multiplication just smashes across!)</em></p>
         </div>
     </div>
 
-    <h2>VI. The Cheat Sheet</h2>
+    <h2>VI. The Property Cheat Sheet</h2>
     <div class="cheat-sheet">
-        <div class="cheat-box"><strong>Commutation:</strong> \(a+b = b+a\). Order doesn't change a sum.</div>
-        <div class="cheat-box"><strong>Association:</strong> \((a+b)+c = a+(b+c)\). Grouping doesn't change a sum.</div>
-        <div class="cheat-box"><strong>Distribution:</strong> \(a(b+c) = ab + ac\). Outside factor visits all inside.</div>
+        <div class="cheat-box"><strong>Commutation:</strong> \(a+b = b+a\). Order doesn't change sums/products.</div>
+        <div class="cheat-box"><strong>Association:</strong> \((a+b)+c = a+(b+c)\). Grouping doesn't change sums.</div>
+        <div class="cheat-box"><strong>Distribution:</strong> \(a(b+c) = ab + ac\). Factor visits all terms inside.</div>
         <div class="cheat-box"><strong>The Unit Rule:</strong> Treat \(x+y\) as a locked box \((x+y)\).</div>
     </div>
 
-    <h2>VII. Decision Matrix: 50 Examples of Logic</h2>
-    <table>
+    <h2>VII. Mastery Practice: The Decision Matrix</h2>
+    <p><em>Zahra: Look at the problem and decide your move. <strong>Press and hold</strong> the button to see the detailed reasoning.</em></p>
+    
+    <table id="master-table">
         <thead>
             <tr>
-                <th style="width: 50px;">#</th>
-                <th style="width: 250px;">Problem</th>
-                <th>Decision & Logic</th>
+                <th class="num-col">#</th>
+                <th style="width: 200px;">Problem</th>
+                <th>Action: "What will I do?" (HOLD TO REVEAL)</th>
             </tr>
         </thead>
         <tbody>
-            <tr><td>1</td><td>\(m+n\)</td><td><span class="logic-fail">No Simplification:</span> Addition of different categories.</td></tr>
-            <tr><td>2</td><td>\(mn\)</td><td><span class="logic-pass">Factor:</span> Product of \(m\) and \(n\).</td></tr>
-            <tr><td>3</td><td>\(m(n)\)</td><td><span class="logic-pass">Notation:</span> Touching = Multiplication.</td></tr>
-            <tr><td>4</td><td>\(x+x\)</td><td><span class="logic-pass">Group Terms:</span> Result: \(2x\).</td></tr>
-            <tr><td>5</td><td>\(x \cdot x\)</td><td><span class="logic-pass">Group Factors:</span> Result: \(x^2\).</td></tr>
-            <tr><td>6</td><td>\(10 - 2 + 5\)</td><td><span class="logic-pass">Signs:</span> \(10-2=8\), \(8+5=13\). The minus belongs to the 2.</td></tr>
-            <tr><td>7</td><td>\(ab - ba\)</td><td><span class="logic-pass">Commute:</span> \(ab=ba\), so result is 0.</td></tr>
-            <tr><td>8</td><td>\(4(x+y)\)</td><td><span class="logic-pass">Distribute:</span> \(4x + 4y\).</td></tr>
-            <tr><td>9</td><td>\(4x + y\)</td><td><span class="logic-fail">No Brackets:</span> 4 only belongs to the \(x\).</td></tr>
-            <tr><td>10</td><td>\(-(x-5)\)</td><td><span class="logic-pass">Distribute -1:</span> \(-x + 5\). Sign flips for both.</td></tr>
-            <tr><td>11</td><td>$$\frac{6x}{6}$$</td><td><span class="logic-pass">Cancel Factor:</span> 6 is multiplying. Result: \(x\).</td></tr>
-            <tr><td>12</td><td>$$\frac{6+x}{6}$$</td><td><span class="logic-fail">STOP:</span> 6 is a term. Cannot cancel.</td></tr>
-            <tr><td>13</td><td>$$\frac{ab}{a}$$</td><td><span class="logic-pass">Cancel Factor:</span> Result: \(b\).</td></tr>
-            <tr><td>14</td><td>$$\frac{a+b}{a}$$</td><td><span class="logic-fail">STOP:</span> \(a\) is a term in the unit \((a+b)\).</td></tr>
-            <tr><td>15</td><td>$$\frac{-5m}{-5}$$</td><td><span class="logic-pass">Exact Match:</span> \(-5\) factor cancels. Result: \(m\).</td></tr>
-            <tr><td>16</td><td>$$\frac{-5+m}{-5}$$</td><td><span class="logic-fail">STOP:</span> \(-5\) is a term on top.</td></tr>
-            <tr><td>17</td><td>$$\frac{x(y+1)}{x}$$</td><td><span class="logic-pass">Match Factor:</span> Result: \(y+1\).</td></tr>
-            <tr><td>18</td><td>$$\frac{x+(y+1)}{x}$$</td><td><span class="logic-fail">STOP:</span> \(x\) is separated by a plus sign.</td></tr>
-            <tr><td>19</td><td>$$\frac{m^5}{m}$$</td><td><span class="logic-pass">Indices:</span> Division subtracts powers. Result: \(m^4\).</td></tr>
-            <tr><td>20</td><td>$$\frac{m^5+n}{m}$$</td><td><span class="logic-fail">STOP:</span> \(m^5\) is a term, not a factor.</td></tr>
-            <tr><td>21</td><td>$$(x+y)(x+y)$$</td><td><span class="logic-pass">Expand:</span> \(x^2 + 2xy + y^2\).</td></tr>
-            <tr><td>22</td><td>$$(x+y)(x-y)$$</td><td><span class="logic-pass">Expand:</span> \(x^2 - y^2\).</td></tr>
-            <tr><td>23</td><td>$$\frac{x^2-y^2}{x-y}$$</td><td><span class="logic-pass">Factor First:</span> Expand top then cancel unit. Result: \(x+y\).</td></tr>
-            <tr><td>24</td><td>$$\frac{3x+3y}{3}$$</td><td><span class="logic-pass">Factor Out:</span> \(\frac{3(x+y)}{3}\). Now cancel. Result: \(x+y\).</td></tr>
-            <tr><td>25</td><td>$$\frac{x+y}{5x+5y}$$</td><td><span class="logic-pass">Factor Bottom:</span> Cancel the unit \((x+y)\). Result: \(\frac{1}{5}\).</td></tr>
-            <tr><td>26</td><td>\((a+b) - a\)</td><td><span class="logic-pass">Combine:</span> \(a-a=0\). Result: \(b\).</td></tr>
-            <tr><td>27</td><td>\(m - (n + p)\)</td><td><span class="logic-pass">Distribute:</span> \(m - n - p\).</td></tr>
-            <tr><td>28</td><td>\(m - (n - p)\)</td><td><span class="logic-pass">Double Negative:</span> \(-(-p) = +p\). Result: \(m - n + p\).</td></tr>
-            <tr><td>29</td><td>\(5x \cdot 2y\)</td><td><span class="logic-pass">Multiply factors:</span> \(10xy\).</td></tr>
-            <tr><td>30</td><td>\(5x + 2y\)</td><td><span class="logic-fail">STOP:</span> Cannot combine different terms.</td></tr>
-            <tr><td>31</td><td>$$\frac{x}{4} + \frac{y}{4}$$</td><td><span class="logic-pass">Same Denom:</span> Just combine. \(\frac{x+y}{4}\).</td></tr>
-            <tr><td>32</td><td>$$\frac{x}{4} + \frac{x}{3}$$</td><td><span class="logic-pass">LCM:</span> Triggered by addition. Result: \(\frac{7x}{12}\).</td></tr>
-            <tr><td>33</td><td>$$\frac{a}{b} \cdot \frac{c}{d}$$</td><td><span class="logic-fail">NO LCM:</span> Multiplication across. Result: \(\frac{ac}{bd}\).</td></tr>
-            <tr><td>34</td><td>$$\frac{1}{x} - \frac{1}{y}$$</td><td><span class="logic-pass">LCM:</span> \(xy\). Result: \(\frac{y-x}{xy}\).</td></tr>
-            <tr><td>35</td><td>$$\frac{a}{b} \div \frac{c}{d}$$</td><td><span class="logic-pass">Flip:</span> \(\frac{a}{b} \cdot \frac{d}{c}\). Result: \(\frac{ad}{bc}\).</td></tr>
-            <tr><td>36</td><td>\(x^4 \cdot x^2\)</td><td><span class="logic-pass">Indices:</span> Multiplied factors. Add powers: \(x^6\).</td></tr>
-            <tr><td>37</td><td>\(x^4 + x^2\)</td><td><span class="logic-fail">STOP:</span> Addition does not change indices.</td></tr>
-            <tr><td>38</td><td>$$\frac{x^4}{x^2}$$</td><td><span class="logic-pass">Indices:</span> Division. Subtract powers: \(x^2\).</td></tr>
-            <tr><td>39</td><td>\(x^0\)</td><td><span class="logic-pass">Rule:</span> Always 1.</td></tr>
-            <tr><td>40</td><td>\(2(x+3) - 6\)</td><td><span class="logic-pass">Distribute:</span> \(2x+6-6 = 2x\).</td></tr>
-            <tr><td>41</td><td>$$\frac{m(n+1)}{m(n+2)}$$</td><td><span class="logic-pass">Cancel factor:</span> Outside \(m\) cancels. Result: \(\frac{n+1}{n+2}\).</td></tr>
-            <tr><td>42</td><td>$$\frac{n+1}{n+2}$$</td><td><span class="logic-fail">STOP:</span> Components are terms inside locked boxes.</td></tr>
-            <tr><td>43</td><td>$$\frac{12a^3b}{4ab}$$</td><td><span class="logic-pass">Factors:</span> Divide coefficients and indices. Result: \(3a^2\).</td></tr>
-            <tr><td>44</td><td>$$\frac{x+y}{x-y} \cdot \frac{x-y}{x+y}$$</td><td><span class="logic-pass">Units Match:</span> Smashed together, all cancel. Result: 1.</td></tr>
-            <tr><td>45</td><td>$$\frac{x+y}{x-y} + \frac{x-y}{x+y}$$</td><td><span class="logic-pass">LCM:</span> Bridge needed for addition.</td></tr>
-            <tr><td>46</td><td>$$x - 4(x-2)$$</td><td><span class="logic-pass">Distribute:</span> \(x - 4x + 8 = -3x + 8\).</td></tr>
-            <tr><td>47</td><td>\(y^3 + y^3\)</td><td><span class="logic-pass">Terms:</span> Same category. Result: \(2y^3\).</td></tr>
-            <tr><td>48</td><td>\(y^3 \cdot y^3\)</td><td><span class="logic-pass">Factors:</span> Result: \(y^6\).</td></tr>
-            <tr><td>49</td><td>$$\frac{ab}{a+b}$$</td><td><span class="logic-fail">STOP:</span> No match between factors (top) and terms (bottom).</td></tr>
-            <tr><td>50</td><td>$$(x-y)^2 + 2xy$$</td><td><span class="logic-pass">Collapse:</span> \(x^2 - 2xy + y^2 + 2xy = x^2 + y^2\).</td></tr>
-        </tbody>
+            </tbody>
     </table>
 
+    <script>
+        const examples = [
+            { q: "\\(m+n\\)", a: "<div class='logic-fail'>No Simplification.</div><div class='reason'><strong>Why not:</strong> The plus sign glues these together as separate terms. Because 'm' and 'n' are different variables (different categories), they cannot be combined into a single term.</div>" },
+            { q: "\\(mn\\)", a: "<div class='logic-pass'>It is Simplified.</div><div class='reason'><strong>Why:</strong> The touching letters mean they are multiplying. This is a single term made of two Factors (m and n).</div>" },
+            { q: "\\(m(n)\\)", a: "<div class='logic-pass'>Remove the brackets.</div><div class='reason'><strong>Why:</strong> Brackets touching a letter signify multiplication. It means exactly the same thing as 'mn'.</div>" },
+            { q: "\\(x+x\\)", a: "<div class='logic-pass'>Collapse to 2x.</div><div class='reason'><strong>Why:</strong> You are adding two identical Terms. One 'x' plus another 'x' gives you a total count of two 'x's.</div>" },
+            { q: "\\(x \\cdot x\\)", a: "<div class='logic-pass'>Collapse to x².</div><div class='reason'><strong>Why:</strong> You are multiplying identical Factors. Multiplication of the same base increases the exponent (index), not the coefficient.</div>" },
+            { q: "10 - 2 + 5", a: "<div class='logic-pass'>Calculate left to right: 13.</div><div class='reason'><strong>Why:</strong> The minus sign belongs strictly to the 2. Calculate 10 - 2 to get 8, and then add 5 to get 13. Never add the 2 and 5 first!</div>" },
+            { q: "\\(ab - ba\\)", a: "<div class='logic-pass'>Collapse to 0.</div><div class='reason'><strong>Why:</strong> The Commutative property means order doesn't matter in multiplication (ab = ba). Subtracting a term from its identical self always leaves 0.</div>" },
+            { q: "4(x+y)", a: "<div class='logic-pass'>Distribute the 4.</div><div class='reason'><strong>Why:</strong> The Distributive property says a factor outside a bracket must multiply EVERY term inside the bracket. Result: 4x + 4y.</div>" },
+            { q: "4x + y", a: "<div class='logic-fail'>Stop. Do not distribute.</div><div class='reason'><strong>Why not:</strong> There are no brackets. The 4 is only a factor of the 'x', it has no relationship with the 'y'.</div>" },
+            { q: "-(x-5)", a: "<div class='logic-pass'>Distribute the negative.</div><div class='reason'><strong>Why:</strong> A negative sign outside a bracket acts like a '-1' multiplier. It flips the sign of every term inside. Result: -x + 5.</div>" },
+            { q: "$$\\frac{6x}{6}$$", a: "<div class='logic-pass'>Cancel the 6.</div><div class='reason'><strong>Why:</strong> The 6 in the numerator is a Factor (it is multiplying the x). Because it matches the factor on the bottom exactly, it can be cancelled. Result: x.</div>" },
+            { q: "$$\\frac{6+x}{6}$$", a: "<div class='logic-fail'>Stop. Do not cancel.</div><div class='reason'><strong>Why not:</strong> The 6 in the numerator is a Term (glued to the x by a plus sign). You can NEVER cancel individual parts of a term.</div>" },
+            { q: "$$\\frac{ab}{a}$$", a: "<div class='logic-pass'>Cancel the 'a'.</div><div class='reason'><strong>Why:</strong> Both 'a' and 'b' are Factors. Since 'a' is multiplying the entire top, it is free to be cancelled with the 'a' on the bottom. Result: b.</div>" },
+            { q: "$$\\frac{a+b}{a}$$", a: "<div class='logic-fail'>Stop. Do not cancel.</div><div class='reason'><strong>Why not:</strong> The numerator is a Polynomial Unit (a+b). The 'a' on top is trapped by the plus sign. You cannot reach inside the unit to cancel.</div>" },
+            { q: "$$\\frac{-5m}{-5}$$", a: "<div class='logic-pass'>Cancel the -5.</div><div class='reason'><strong>Why:</strong> The -5 is a Factor multiplying the 'm'. Because the entire -5 matches the bottom exactly, you can cancel it. Result: m.</div>" },
+            { q: "$$\\frac{-5+m}{-5}$$", a: "<div class='logic-fail'>Stop. Do not cancel.</div><div class='reason'><strong>Why not:</strong> The -5 in the numerator is separated from 'm' by a plus sign. That makes it a glued Term. It cannot be moved.</div>" },
+            { q: "$$\\frac{x(y+1)}{x}$$", a: "<div class='logic-pass'>Cancel the 'x'.</div><div class='reason'><strong>Why:</strong> The 'x' is a Factor multiplying the entire bracket (y+1). Because it is on the outside, it is free to cancel. Result: y+1.</div>" },
+            { q: "$$\\frac{x+(y+1)}{x}$$", a: "<div class='logic-fail'>Stop. Do not cancel.</div><div class='reason'><strong>Why not:</strong> The 'x' on top is a Term separated by a plus sign from the bracket. It is not multiplying the whole numerator.</div>" },
+            { q: "$$\\frac{m^5}{m}$$", a: "<div class='logic-pass'>Subtract the indices.</div><div class='reason'><strong>Why:</strong> You are dividing identical bases. This cancels out one 'm' factor from the top. 5 minus 1 leaves m⁴.</div>" },
+            { q: "$$\\frac{m^5+n}{m}$$", a: "<div class='logic-fail'>Stop. Do not cancel.</div><div class='reason'><strong>Why not:</strong> The m⁵ is glued to the 'n' by a plus sign. It is a Term inside a larger unit, so the index rules for division don't apply here.</div>" },
+            { q: "(x+y)(x+y)", a: "<div class='logic-pass'>Expand (Perfect Square).</div><div class='reason'><strong>Why:</strong> You must multiply every term in the first bracket by every term in the second. Result: x² + xy + xy + y² = x² + 2xy + y².</div>" },
+            { q: "(x+y)(x-y)", a: "<div class='logic-pass'>Expand (Difference of Squares).</div><div class='reason'><strong>Why:</strong> The middle terms will be +xy and -xy, which cancel each other out to zero. Result: x² - y².</div>" },
+            { q: "$$\\frac{x^2-y^2}{x-y}$$", a: "<div class='logic-pass'>Factor, then Cancel.</div><div class='reason'><strong>Why:</strong> You cannot cancel terms. But if you expand the top to (x+y)(x-y), the entire (x-y) unit becomes a matching Factor and cancels out. Result: x+y.</div>" },
+            { q: "$$\\frac{3x+3y}{3}$$", a: "<div class='logic-pass'>Factor out the 3, then cancel.</div><div class='reason'><strong>Why:</strong> You cannot cancel the 3s as terms. But you can rewrite the top as 3(x+y). Now the 3 is a Factor and can be cancelled! Result: x+y.</div>" },
+            { q: "$$\\frac{x+y}{5x+5y}$$", a: "<div class='logic-pass'>Factor the bottom, cancel unit.</div><div class='reason'><strong>Why:</strong> Rewrite bottom as 5(x+y). The entire (x+y) unit matches top and bottom. Result: 1/5 (don't forget the 1 on top!).</div>" },
+            { q: "(a+b) - a", a: "<div class='logic-pass'>Combine like terms.</div><div class='reason'><strong>Why:</strong> The brackets aren't multiplying anything. You have a positive 'a' and a negative 'a' which cancel out. Result: b.</div>" },
+            { q: "m - (n + p)", a: "<div class='logic-pass'>Distribute the negative sign.</div><div class='reason'><strong>Why:</strong> The minus sign outside acts like a -1 multiplier for the WHOLE bracket. It flips the sign of n and p. Result: m - n - p.</div>" },
+            { q: "m - (n - p)", a: "<div class='logic-pass'>Distribute (Double Negative).</div><div class='reason'><strong>Why:</strong> The outside negative multiplies the positive 'n' (making it -n) and the negative 'p' (making it +p). Result: m - n + p.</div>" },
+            { q: "5x * 2y", a: "<div class='logic-pass'>Multiply the factors.</div><div class='reason'><strong>Why:</strong> Since everything is multiplication, you can reorder them (Commutation). Multiply 5*2 to get 10, then attach the variables. Result: 10xy.</div>" },
+            { q: "5x + 2y", a: "<div class='logic-fail'>Stop. Do not combine.</div><div class='reason'><strong>Why not:</strong> They are connected by addition, meaning they are Terms. Because 'x' and 'y' are different categories, they cannot be added.</div>" },
+            { q: "$$\\frac{x}{4} + \\frac{y}{4}$$", a: "<div class='logic-pass'>Combine numerators over one base.</div><div class='reason'><strong>Why:</strong> The denominators are already the same, so the 'bridge' is already built. Just combine the tops: (x+y)/4.</div>" },
+            { q: "$$\\frac{x}{4} + \\frac{x}{3}$$", a: "<div class='logic-pass'>Find the LCM.</div><div class='reason'><strong>Why:</strong> The plus sign means there is a 'canyon' between the fractions. The denominators are different, so you MUST use LCM (12) to bridge them. Result: 7x/12.</div>" },
+            { q: "$$\\frac{a}{b} \\cdot \\frac{c}{d}$$", a: "<div class='logic-fail'>No LCM needed.</div><div class='reason'><strong>Why not:</strong> Multiplication means the fractions are in a 'tunnel' together. Just smash them straight across. Top times top, bottom times bottom. Result: ac/bd.</div>" },
+            { q: "$$\\frac{1}{x} - \\frac{1}{y}$$", a: "<div class='logic-pass'>Find the LCM.</div><div class='reason'><strong>Why:</strong> The minus sign triggers the need for a common denominator. The LCM of x and y is xy. Multiply left by y/y and right by x/x. Result: (y-x)/xy.</div>" },
+            { q: "$$\\frac{a}{b} \\div \\frac{c}{d}$$", a: "<div class='logic-pass'>Flip the second, then multiply.</div><div class='reason'><strong>Why:</strong> Dividing by a fraction is mathematically identical to multiplying by its reciprocal. Turn it into a/b * d/c. Result: ad/bc.</div>" },
+            { q: "x⁴ * x²", a: "<div class='logic-pass'>Add the indices.</div><div class='reason'><strong>Why:</strong> You are multiplying the same base. That means you have four x's multiplying two more x's, making a total of six x's multiplying. Result: x⁶.</div>" },
+            { q: "x⁴ + x²", a: "<div class='logic-fail'>Stop. Do not combine.</div><div class='reason'><strong>Why not:</strong> The addition sign makes them Terms. Because they have different powers, they are different categories and cannot be added.</div>" },
+            { q: "$$\\frac{x^4}{x^2}$$", a: "<div class='logic-pass'>Subtract the indices.</div><div class='reason'><strong>Why:</strong> Division of identical bases means the factors cancel out. Four on top, two on bottom. Two cancel, leaving two on top. Result: x².</div>" },
+            { q: "x⁰", a: "<div class='logic-pass'>Convert to 1.</div><div class='reason'><strong>Why:</strong> Mathematical rule: Any non-zero base raised to the power of zero is exactly 1.</div>" },
+            { q: "2(x+3) - 6", a: "<div class='logic-pass'>Distribute, then combine.</div><div class='reason'><strong>Why:</strong> First distribute the 2 to get 2x + 6. Then the +6 and -6 are terms that cancel each other out to zero. Result: 2x.</div>" },
+            { q: "$$\\frac{m(n+1)}{m(n+2)}$$", a: "<div class='logic-pass'>Cancel the 'm'.</div><div class='reason'><strong>Why:</strong> The 'm' on top and bottom are Factors (outside the brackets). They can be cancelled. Result: (n+1)/(n+2).</div>" },
+            { q: "$$\\frac{n+1}{n+2}$$", a: "<div class='logic-fail'>Stop. Do not cancel the n's.</div><div class='reason'><strong>Why not:</strong> The expressions (n+1) and (n+2) are locked Polynomial Units. The 'n' is glued by the plus sign. No further simplification is possible.</div>" },
+            { q: "$$\\frac{12a^3b}{4ab}$$", a: "<div class='logic-pass'>Divide coefficients, subtract indices.</div><div class='reason'><strong>Why:</strong> These are all Factors. 12/4 = 3. a³/a = a². The b's cancel completely. Result: 3a².</div>" },
+            { q: "$$\\frac{x+y}{x-y} \\cdot \\frac{x-y}{x+y}$$", a: "<div class='logic-pass'>Cancel matching units.</div><div class='reason'><strong>Why:</strong> It's multiplication, so it's one big fraction. The (x+y) unit on top cancels the one on bottom. Same for (x-y). Result: 1.</div>" },
+            { q: "$$\\frac{x+y}{x-y} + \\frac{x-y}{x+y}$$", a: "<div class='logic-pass'>Find the LCM.</div><div class='reason'><strong>Why:</strong> The plus sign means you MUST build a bridge. The LCM is the two units multiplied together: (x-y)(x+y).</div>" },
+            { q: "x - 4(x-2)", a: "<div class='logic-pass'>Distribute -4, then combine.</div><div class='reason'><strong>Why:</strong> The sign belongs to the 4! Distribute -4 to get -4x + 8. Then combine x - 4x to get -3x. Result: -3x + 8.</div>" },
+            { q: "y³ + y³", a: "<div class='logic-pass'>Combine terms.</div><div class='reason'><strong>Why:</strong> You have one y³ and you add another y³. They are the same category, so you just count them. Result: 2y³.</div>" },
+            { q: "y³ * y³", a: "<div class='logic-pass'>Add the indices.</div><div class='reason'><strong>Why:</strong> This is multiplication of the same base. You are increasing the power, not the count. Result: y⁶.</div>" },
+            { q: "$$\\frac{ab}{a+b}$$", a: "<div class='logic-fail'>Stop. Do not cancel.</div><div class='reason'><strong>Why not:</strong> The top 'a' and 'b' are Factors, but the bottom 'a' and 'b' are Terms glued by addition. They are not an exact match.</div>" },
+            { q: "(x-y)² + 2xy", a: "<div class='logic-pass'>Expand unit, then collapse.</div><div class='reason'><strong>Why:</strong> Expand (x-y)² to get x² - 2xy + y². The -2xy and the +2xy terms will cancel each other out perfectly. Result: x² + y².</div>" }
+        ];
+
+        const tbody = document.querySelector('#master-table tbody');
+        
+        examples.forEach((ex, i) => {
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+                <td class="num-col">${i+1}</td>
+                <td class="prob-col">${ex.q}</td>
+                <td>
+                    <div class="interactive-wrapper" 
+                         onmousedown="this.children[1].style.opacity='0'" 
+                         onmouseup="this.children[1].style.opacity='1'"
+                         onmouseleave="this.children[1].style.opacity='1'"
+                         ontouchstart="this.children[1].style.opacity='0'"
+                         ontouchend="this.children[1].style.opacity='1'">
+                        <div class="logic-content">${ex.a}</div>
+                        <div class="reveal-btn">What will I do?</div>
+                    </div>
+                </td>
+            `;
+            tbody.appendChild(tr);
+        });
+    </script>
 </body>
 </html>
