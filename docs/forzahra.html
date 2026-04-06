@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Algebra Mastery - Zahra</title>
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <style>
+        body { 
+            font-family: 'Segoe UI', Arial, sans-serif; 
+            line-height: 1.8; 
+            color: #1a202c; 
+            max-width: 1050px; 
+            margin: 0 auto; 
+            padding: 40px; 
+            background-color: #fff; 
+        }
+        .dad-header { 
+            text-align: center; 
+            font-size: 3.5em; 
+            font-weight: 800; 
+            color: #2d3748; 
+            margin-bottom: 5px; 
+            border-bottom: 5px solid #2d3748;
+            padding-bottom: 10px;
+        }
+        .sub-title { 
+            text-align: center; 
+            font-size: 1.6em; 
+            color: #718096; 
+            margin-bottom: 40px; 
+            text-transform: uppercase; 
+            letter-spacing: 3px;
+        }
+        h2 { 
+            background: #2d3748; 
+            color: white; 
+            padding: 12px 20px; 
+            border-radius: 4px; 
+            margin-top: 50px; 
+        }
+        h3 { 
+            color: #2b6cb0; 
+            border-bottom: 2px solid #e2e8f0; 
+            padding-bottom: 5px; 
+        }
+        .criteria-box { 
+            background: #f8fafc; 
+            border: 2px solid #2b6cb0; 
+            padding: 25px; 
+            border-radius: 8px; 
+            margin: 20px 0; 
+        }
+        .grid-container { 
+            display: grid; 
+            grid-template-columns: 1fr 1fr; 
+            gap: 20px; 
+            margin-top: 15px; 
+        }
+        .example-card { 
+            padding: 20px; 
+            border-radius: 8px; 
+            border: 1px solid #cbd5e0; 
+        }
+        .valid { border-left: 10px solid #48bb78; background: #f0fff4; }
+        .invalid { border-left: 10px solid #f56565; background: #fff5f5; }
+        
+        table { width: 100%; border-collapse: collapse; margin-top: 30px; font-size: 0.95em; }
+        th { background: #2d3748; color: white; padding: 15px; text-align: left; border: 1px solid #2d3748; }
+        td { padding: 12px; border: 1px solid #e2e8f0; vertical-align: top; }
+        tr:nth-child(even) { background: #f7fafc; }
+        
+        .logic-pass { color: #2f855a; font-weight: bold; }
+        .logic-fail { color: #c53030; font-weight: bold; }
+
+        .cheat-sheet { 
+            display: grid; 
+            grid-template-columns: repeat(2, 1fr); 
+            gap: 15px; 
+            margin-top: 20px;
+        }
+        .cheat-box { 
+            background: #edf2f7; 
+            padding: 15px; 
+            border-radius: 6px; 
+            border: 1px solid #cbd5e0; 
+            font-size: 0.95em;
+        }
+        @media print {
+            body { padding: 20px; }
+            h2, .criteria-box, table { page-break-inside: avoid; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="dad-header">For Zahra, with love from dad</div>
+    <div class="sub-title">Rules of Algebraic Identification</div>
+
+    <h2>I. Foundational Definitions</h2>
+    <div class="grid-container">
+        <div class="example-card">
+            <h3>1. The Factor</h3>
+            <p><strong>Definition:</strong> A component that is linked to others strictly by <strong>multiplication</strong>.</p>
+            <ul>
+                <li><strong>Criteria:</strong> It must multiply the <em>entire</em> numerator or denominator.</li>
+                <li><strong>Behavior:</strong> Can be "unhooked" and cancelled individually.</li>
+            </ul>
+        </div>
+        <div class="example-card">
+            <h3>2. The Term</h3>
+            <p><strong>Definition:</strong> A component that is linked to others by <strong>addition or subtraction</strong>.</p>
+            <ul>
+                <li><strong>Criteria:</strong> Separated by \(+\) or \(-\) signs.</li>
+                <li><strong>Behavior:</strong> Glued to the unit. Cannot be cancelled on its own.</li>
+            </ul>
+        </div>
+    </div>
+
+    <h2>II. Criteria for Cancellation</h2>
+    <p>Cancellation is the division of the numerator and denominator by the same number. It only works if the number is a "Factor."</p>
+    
+    <div class="criteria-box">
+        <strong>The Three Cancellation Criteria:</strong>
+        <ol>
+            <li>The number must be a <strong>Factor</strong> (multiplied by the whole top/bottom).</li>
+            <li>The numerator and denominator factors must be an <strong>Exact Match</strong>.</li>
+            <li>If a component is inside a sum (e.g., \(x+2\)), the <strong>entire bracket</strong> is the factor.</li>
+        </ol>
+    </div>
+
+    <div class="grid-container">
+        <div class="example-card valid">
+            <strong>Positive Example (Valid):</strong>
+            $$\frac{3(x+y)}{3}$$
+            <span class="logic-pass">Why:</span> The \(3\) is a <strong>factor</strong> multiplying the whole bracket. Criterion met. <br>
+            <strong>Result:</strong> \(x+y\)
+        </div>
+        <div class="example-card invalid">
+            <strong>Negative Example (Invalid):</strong>
+            $$\frac{3+x+y}{3}$$
+            <span class="logic-fail">Why Not:</span> The \(3\) on top is a <strong>term</strong>. It is not multiplying the top. Criterion failed. <br>
+            <strong>Result:</strong> Cannot be simplified.
+        </div>
+        <div class="example-card valid">
+            <strong>Positive Example (Unit Match):</strong>
+            $$\frac{(x+2)(x-3)}{(x+2)}$$
+            <span class="logic-pass">Why:</span> The <strong>entire bracket</strong> \((x+2)\) is a factor on both top and bottom. <br>
+            <strong>Result:</strong> \(x-3\)
+        </div>
+        <div class="example-card invalid">
+            <strong>Negative Example (Breaking Units):</strong>
+            $$\frac{x+2}{x}$$
+            <span class="logic-fail">Why Not:</span> You cannot cancel the \(x\). It is a <strong>term</strong> inside the locked unit \((x+2)\). <br>
+            <strong>Result:</strong> Cannot be simplified.
+        </div>
+    </div>
+
+    <h2>III. Criteria for using LCM</h2>
+    <p>LCM (Least Common Multiple) is a "bridge" builder used to combine two separate fractions into one.</p>
+
+    <div class="criteria-box">
+        <strong>The Three LCM Criteria:</strong>
+        <ol>
+            <li>The operation must be <strong>Addition</strong> \(+\) or <strong>Subtraction</strong> \(-\).</li>
+            <li>There must be <strong>two or more</strong> separate fraction bars.</li>
+            <li>The denominators must be <strong>different</strong>.</li>
+        </ol>
+    </div>
+
+    <div class="grid-container">
+        <div class="example-card valid">
+            <strong>Positive Example (Need LCM):</strong>
+            $$\frac{x}{2} + \frac{y}{3}$$
+            <span class="logic-pass">Why:</span> Addition between different denominators. <br>
+            <strong>Action:</strong> Find LCM (6). Result: \(\frac{3x+2y}{6}\)
+        </div>
+        <div class="example-card invalid">
+            <strong>Negative Example (No LCM):</strong>
+            $$\frac{x}{2} \cdot \frac{y}{3}$$
+            <span class="logic-fail">Why Not:</span> This is <strong>multiplication</strong>. LCM is never used for multiplication. <br>
+            <strong>Action:</strong> Multiply across. Result: \(\frac{xy}{6}\)
+        </div>
+    </div>
+
+    <h2>IV. The Algebraic Cheat Sheet</h2>
+    <div class="cheat-sheet">
+        <div class="cheat-box"><strong>Association:</strong> \((a+b)+c = a+(b+c)\) — Grouping doesn't change a sum.</div>
+        <div class="cheat-box"><strong>Commutation:</strong> \(a+b = b+a\) — Order doesn't change a sum.</div>
+        <div class="cheat-box"><strong>Distribution:</strong> \(a(b+c) = ab+ac\) — Outer factor visits every inner term.</div>
+        <div class="cheat-box"><strong>The Unit Rule:</strong> If you see \(x+y\), treat it as a single unit \((x+y)\).</div>
+    </div>
+
+    <h2>V. Decision Matrix: 50 Mastery Examples</h2>
+    <table>
+        <thead>
+            <tr>
+                <th style="width: 50px;">#</th>
+                <th style="width: 250px;">Expression</th>
+                <th>Decision & Why</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr><td>1</td><td>\(m+n\)</td><td><span class="logic-fail">No Simplification:</span> Addition of two different categories.</td></tr>
+            <tr><td>2</td><td>\(mn\)</td><td><span class="logic-pass">Simplified:</span> Multiplication of factors \(m\) and \(n\).</td></tr>
+            <tr><td>3</td><td>\(m(n)\)</td><td><span class="logic-pass">Notation:</span> Same as \(mn\). Touching = Factor.</td></tr>
+            <tr><td>4</td><td>\(m+m\)</td><td><span class="logic-pass">Collapse to \(2m\):</span> Addition of identical terms.</td></tr>
+            <tr><td>5</td><td>\(m \cdot m\)</td><td><span class="logic-pass">Collapse to \(m^2\):</span> Multiplication of identical factors.</td></tr>
+            <tr><td>6</td><td>\(x + y - y\)</td><td><span class="logic-pass">Collapse to \(x\):</span> Terms \(+y\) and \(-y\) cancel to zero.</td></tr>
+            <tr><td>7</td><td>\(xy - yx\)</td><td><span class="logic-pass">Collapse to 0:</span> Factors commute (\(xy = yx\)). Subtraction of identical terms.</td></tr>
+            <tr><td>8</td><td>\(3(a+b)\)</td><td><span class="logic-pass">Distribute:</span> Multiplier visits both inside. Result: \(3a + 3b\).</td></tr>
+            <tr><td>9</td><td>\(3a + b\)</td><td><span class="logic-fail">No Distribution:</span> No brackets; \(3\) is only a factor of \(a\).</td></tr>
+            <tr><td>10</td><td>\(-(x-2)\)</td><td><span class="logic-pass">Distribute:</span> Flip all signs inside. Result: \(-x + 2\).</td></tr>
+            <tr><td>11</td><td>$$\frac{5x}{5}$$</td><td><span class="logic-pass">Cancel:</span> \(5\) is a factor. Result: \(x\).</td></tr>
+            <tr><td>12</td><td>$$\frac{5+x}{5}$$</td><td><span class="logic-fail">STOP:</span> \(5\) on top is a term. Cannot cancel.</td></tr>
+            <tr><td>13</td><td>$$\frac{ab}{a}$$</td><td><span class="logic-pass">Cancel:</span> \(a\) is a factor. Result: \(b\).</td></tr>
+            <tr><td>14</td><td>$$\frac{a+b}{a}$$</td><td><span class="logic-fail">STOP:</span> \(a\) on top is a term in the unit \((a+b)\).</td></tr>
+            <tr><td>15</td><td>$$\frac{-3m}{-3}$$</td><td><span class="logic-pass">Cancel:</span> \(-3\) factor matches. Result: \(m\).</td></tr>
+            <tr><td>16</td><td>$$\frac{-3+m}{-3}$$</td><td><span class="logic-fail">STOP:</span> \(-3\) on top is a term separated by \(+\).</td></tr>
+            <tr><td>17</td><td>$$\frac{x(y+z)}{x}$$</td><td><span class="logic-pass">Cancel:</span> \(x\) is a factor of the whole numerator. Result: \(y+z\).</td></tr>
+            <tr><td>18</td><td>$$\frac{x+(y+z)}{x}$$</td><td><span class="logic-fail">STOP:</span> \(x\) is a term separated by \(+\).</td></tr>
+            <tr><td>19</td><td>$$\frac{m^4}{m}$$</td><td><span class="logic-pass">Indices:</span> One factor cancels. Result: \(m^3\).</td></tr>
+            <tr><td>20</td><td>$$\frac{m^4+n}{m}$$</td><td><span class="logic-fail">STOP:</span> \(m^4\) is a term in the polynomial.</td></tr>
+            <tr><td>21</td><td>$$(x+y)^2$$</td><td><span class="logic-pass">Identity:</span> Expand to \(x^2 + 2xy + y^2\).</td></tr>
+            <tr><td>22</td><td>$$(x+y)(x-y)$$</td><td><span class="logic-pass">Identity:</span> Expand to \(x^2 - y^2\). (Middle terms cancel).</td></tr>
+            <tr><td>23</td><td>$$\frac{x^2-y^2}{x-y}$$</td><td><span class="logic-pass">Factor First:</span> Expand top to \((x+y)(x-y)\), then cancel unit. Result: \(x+y\).</td></tr>
+            <tr><td>24</td><td>$$\frac{2x+2y}{2}$$</td><td><span class="logic-pass">Factor First:</span> Becomes \(\frac{2(x+y)}{2}\). Cancel factor 2. Result: \(x+y\).</td></tr>
+            <tr><td>25</td><td>$$\frac{x+y}{2x+2y}$$</td><td><span class="logic-pass">Factor Bottom:</span> Becomes \(\frac{(x+y)}{2(x+y)}\). Cancel unit. Result: \(\frac{1}{2}\).</td></tr>
+            <tr><td>26</td><td>\((a+b) - a\)</td><td><span class="logic-pass">Collapse:</span> \(a - a + b\). Result: \(b\).</td></tr>
+            <tr><td>27</td><td>\(m - (n + p)\)</td><td><span class="logic-pass">Distribute:</span> Minus visits both. Result: \(m - n - p\).</td></tr>
+            <tr><td>28</td><td>\(m - (n - p)\)</td><td><span class="logic-pass">Double Neg:</span> \(-(-p) = +p\). Result: \(m - n + p\).</td></tr>
+            <tr><td>29</td><td>\(4x \cdot 3y\)</td><td><span class="logic-pass">Factors:</span> Multiply coefficients and letters. Result: \(12xy\).</td></tr>
+            <tr><td>30</td><td>\(4x + 3y\)</td><td><span class="logic-fail">STOP:</span> Different term categories. Cannot combine.</td></tr>
+            <tr><td>31</td><td>$$\frac{a}{2} + \frac{b}{2}$$</td><td><span class="logic-pass">Combine:</span> Same denominator. No LCM. Result: \(\frac{a+b}{2}\).</td></tr>
+            <tr><td>32</td><td>$$\frac{a}{2} + \frac{a}{3}$$</td><td><span class="logic-pass">LCM:</span> Triggered by addition. Result: \(\frac{3a+2a}{6} = \frac{5a}{6}\).</td></tr>
+            <tr><td>33</td><td>$$\frac{x}{y} \cdot \frac{w}{z}$$</td><td><span class="logic-fail">NO LCM:</span> Multiplication. Multiply across. Result: \(\frac{xw}{yz}\).</td></tr>
+            <tr><td>34</td><td>$$\frac{1}{x} - \frac{1}{y}$$</td><td><span class="logic-pass">LCM:</span> Different denominators. Result: \(\frac{y-x}{xy}\).</td></tr>
+            <tr><td>35</td><td>$$\frac{m}{n} \div \frac{p}{q}$$</td><td><span class="logic-pass">Flip & Mult:</span> \(\frac{m}{n} \cdot \frac{q}{p}\). Result: \(\frac{mq}{np}\).</td></tr>
+            <tr><td>36</td><td>\(x^6 \cdot x^2\)</td><td><span class="logic-pass">Indices:</span> Multiplication adds powers. Result: \(x^8\).</td></tr>
+            <tr><td>37</td><td>\(x^6 + x^2\)</td><td><span class="logic-fail">STOP:</span> Addition does not change powers.</td></tr>
+            <tr><td>38</td><td>$$\frac{x^6}{x^2}$$</td><td><span class="logic-pass">Indices:</span> Division subtracts powers. Result: \(x^4\).</td></tr>
+            <tr><td>39</td><td>\(x^0\)</td><td><span class="logic-pass">Rule:</span> Any base to power 0 is 1.</td></tr>
+            <tr><td>40</td><td>\(5(x+1) - 5x\)</td><td><span class="logic-pass">Distribute:</span> \(5x + 5 - 5x\). Result: \(5\).</td></tr>
+            <tr><td>41</td><td>$$\frac{a(x+2)}{a(x+3)}$$</td><td><span class="logic-pass">Cancel Factor:</span> The outside factor \(a\) cancels. Result: \(\frac{x+2}{x+3}\).</td></tr>
+            <tr><td>42</td><td>$$\frac{x+2}{x+3}$$</td><td><span class="logic-fail">STOP:</span> Individual components are terms in locked boxes.</td></tr>
+            <tr><td>43</td><td>$$\frac{10a^2b}{5ab}$$</td><td><span class="logic-pass">Cancel Factors:</span> \(10/5=2\), \(a^2/a=a\), \(b/b=1\). Result: \(2a\).</td></tr>
+            <tr><td>44</td><td>$$\frac{x+y}{x-y} \cdot \frac{x-y}{x+y}$$</td><td><span class="logic-pass">Cancel Units:</span> Every factor matches. Result: \(1\).</td></tr>
+            <tr><td>45</td><td>$$\frac{x+y}{x-y} + \frac{x-y}{x+y}$$</td><td><span class="logic-pass">LCM:</span> Addition of different denominators. Bridge needed.</td></tr>
+            <tr><td>46</td><td>$$2x - 3(x-1)$$</td><td><span class="logic-pass">Distribute:</span> \(2x - 3x + 3\). Result: \(-x + 3\).</td></tr>
+            <tr><td>47</td><td>\(m^2 + m^2\)</td><td><span class="logic-pass">Group Terms:</span> Two of the same category. Result: \(2m^2\).</td></tr>
+            <tr><td>48</td><td>\(m^2 \cdot m^2\)</td><td><span class="logic-pass">Group Factors:</span> Result: \(m^4\).</td></tr>
+            <tr><td>49</td><td>$$\frac{xy}{x+y}$$</td><td><span class="logic-fail">STOP:</span> Top is factors, bottom is terms. No match.</td></tr>
+            <tr><td>50</td><td>$$(a+b)^2 - 2ab$$</td><td><span class="logic-pass">Expand:</span> \((a^2+2ab+b^2) - 2ab\). Result: \(a^2+b^2\).</td></tr>
+        </tbody>
+    </table>
+
+</body>
+</html>
