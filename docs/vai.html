@@ -1,1 +1,349 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Robust Voice QA Agent</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        .pulse { animation: pulse-animation 1.5s infinite; }
+        @keyframes pulse-animation {
+            0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7); }
+            70% { transform: scale(1.05); box-shadow: 0 0 0 10px rgba(239, 68, 68, 0); }
+            100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); }
+        }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-800 font-sans min-h-screen pb-12">
 
+    <header class="bg-indigo-600 text-white py-6 px-4 shadow-md mb-8">
+        <div class="max-w-5xl mx-auto flex flex-col md:flex-row justify-between items-center gap-4">
+            <div>
+                <h1 class="text-2xl font-bold">Stable Voice QA Agent</h1>
+                <p class="text-indigo-200 text-sm">Ping-Pong Audio Sequencing Architecture</p>
+            </div>
+            <div class="w-full md:w-auto">
+                <label class="block text-xs uppercase tracking-wider text-indigo-200 font-bold mb-1">Groq API Key</label>
+                <input id="apiKeyInput" type="password" placeholder="gsk_..." class="w-full md:w-80 px-3 py-2 rounded bg-indigo-700 text-white placeholder-indigo-400 border border-indigo-500 focus:outline-none focus:ring-2 focus:ring-white">
+            </div>
+        </div>
+    </header>
+
+    <main class="max-w-5xl mx-auto px-4 grid grid-cols-1 md:grid-cols-3 gap-8">
+        
+        <!-- Left Configurations -->
+        <div class="md:col-span-1 flex flex-col gap-6">
+            <div class="bg-white p-5 rounded-xl shadow-sm border border-slate-200">
+                <h2 class="font-bold text-lg mb-3 flex items-center gap-2 text-slate-700">
+                    <span>📋</span> 1. Targeted Questions
+                </h2>
+                <textarea id="targetQuestions" class="w-full h-32 p-3 text-sm border border-slate-300 rounded-lg bg-slate-50">What is your full name?
+What is your best contact email address?
+What specific project or idea do you want to collaborate on?</textarea>
+            </div>
+
+            <div class="bg-white p-5 rounded-xl shadow-sm border border-slate-200">
+                <h2 class="font-bold text-lg mb-3 flex items-center gap-2 text-slate-700">
+                    <span>👤</span> 2. Profile Data ('Me')
+                </h2>
+                <textarea id="profileMe" class="w-full h-32 p-3 text-sm border border-slate-300 rounded-lg bg-slate-50">I am Alex, a Senior UI Developer specializing in high-performance browser applications. I am looking for freelance clients who have clear project requirements, standard budgets, and ready designs.</textarea>
+            </div>
+        </div>
+
+        <!-- Center Display & Hub -->
+        <div class="md:col-span-2 flex flex-col gap-6">
+            
+            <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-200 flex flex-col items-center justify-center min-h-[300px] relative">
+                
+                <div id="statusIndicator" class="absolute top-4 left-4 flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-slate-400">
+                    <span class="w-2 h-2 rounded-full bg-slate-400 block" id="statusDot"></span>
+                    <span id="statusText">Ready</span>
+                </div>
+
+                <div id="chatDisplay" class="w-full flex-grow overflow-y-auto mb-6 p-4 rounded-lg bg-slate-50 border border-slate-100 max-h-48 text-sm flex flex-col gap-2">
+                    <p class="text-slate-400 text-center italic my-auto">
+                        ⚠️ Reminder: Run this via localhost or HTTPS to prevent constant microphone popups! Click below to begin.
+                    </p>
+                </div>
+
+                <button id="actionBtn" class="bg-indigo-600 hover:bg-indigo-700 text-white font-semibold px-8 py-4 rounded-full shadow-lg transition-all flex items-center gap-3 text-lg">
+                    <span id="btnIcon">🚀</span> <span id="btnText">Start Conversation</span>
+                </button>
+                
+                <p id="liveTranscript" class="mt-4 text-xs font-mono text-slate-500 italic text-center w-full max-w-md min-h-[16px]"></p>
+            </div>
+
+            <!-- Notes Target Box -->
+            <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-200">
+                <h2 class="font-bold text-lg mb-3 flex items-center gap-2 text-slate-700">
+                    <span>📝</span> Session Internal Notes & Answers
+                </h2>
+                <textarea id="finalNotesBox" placeholder="The finalized notes will automatically populate here..." class="w-full h-44 p-4 font-mono text-sm border border-slate-300 rounded-lg bg-slate-50 text-slate-600" readonly></textarea>
+            </div>
+
+        </div>
+    </main>
+
+    <script>
+        const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+        const SpeechSynthesis = window.speechSynthesis;
+        
+        let recognition = null;
+        let isSessionActive = false;
+        let conversationHistory = [];
+        let runningNotes = "Initial Notes: Session started.";
+        
+        const apiKeyInput = document.getElementById('apiKeyInput');
+        const targetQuestions = document.getElementById('targetQuestions');
+        const profileMe = document.getElementById('profileMe');
+        const chatDisplay = document.getElementById('chatDisplay');
+        const actionBtn = document.getElementById('actionBtn');
+        const btnIcon = document.getElementById('btnIcon');
+        const btnText = document.getElementById('btnText');
+        const statusText = document.getElementById('statusText');
+        const statusDot = document.getElementById('statusDot');
+        const finalNotesBox = document.getElementById('finalNotesBox');
+        const liveTranscript = document.getElementById('liveTranscript');
+
+        actionBtn.addEventListener('click', () => {
+            if (!isSessionActive) {
+                startAgentSession();
+            }
+        });
+
+        function startAgentSession() {
+            const apiKey = apiKeyInput.value.trim();
+            if (!apiKey) {
+                alert("Please paste your Groq API Key first.");
+                apiKeyInput.focus();
+                return;
+            }
+
+            isSessionActive = true;
+            chatDisplay.innerHTML = '';
+            
+            actionBtn.disabled = true; 
+            actionBtn.className = "bg-slate-400 text-white font-semibold px-8 py-4 rounded-full flex items-center gap-3 text-lg cursor-not-allowed";
+            btnIcon.innerText = '🤖';
+            btnText.innerText = 'Agent Live';
+
+            conversationHistory = [
+                {
+                    role: "system",
+                    content: `You are an automated conversational phone assistant representing 'Me' based on this context: "${profileMe.value}".
+                    Your core target is to get clear answers to: [${targetQuestions.value}].
+                    
+                    CRITICAL FORMAT RULE:
+                    If and only if ALL targeted questions have been satisfactorily answered by the user, you must append the exact token string "[SESSION_COMPLETE]" to the very end of your final sentence.
+                    
+                    Rules:
+                    1. Keep responses brief and friendly (max 2 sentences). 
+                    2. Do not repeat questions if they have already been answered. Move naturally to the next missing data target.
+                    3. Do not ask more than one question at a time.`
+                }
+            ];
+
+            // Build the initial instance engine configuration
+            setupSpeechEngine();
+
+            const welcomeText = `Hello! I am the automated virtual agent representing the profile owner. I am going to capture some essential information that is required if you want to get in touch with them. To get started, could you please tell me your full name?`;
+            
+            appendChatMessage('Agent', welcomeText);
+            conversationHistory.push({ role: "assistant", content: welcomeText });
+            
+            speakText(welcomeText);
+        }
+
+        // Setup clear, non-continuous single utterance recognition engine mechanics
+        function setupSpeechEngine() {
+            if (!SpeechRecognition) return;
+            
+            recognition = new SpeechRecognition();
+            recognition.continuous = false; // Turn off dangerous context streams
+            recognition.interimResults = true;
+            recognition.lang = 'en-US';
+
+            recognition.onstart = () => {
+                updateStatus('listening', 'Listening to you...');
+                liveTranscript.innerText = "...";
+            };
+
+            recognition.onresult = (event) => {
+                let interimTranscript = '';
+                let finalTranscript = '';
+
+                for (let i = event.resultIndex; i < event.results.length; ++i) {
+                    if (event.results[i].isFinal) {
+                        finalTranscript += event.results[i][0].transcript;
+                    } else {
+                        interimTranscript += event.results[i][0].transcript;
+                    }
+                }
+                liveTranscript.innerText = finalTranscript || interimTranscript;
+            };
+
+            recognition.onerror = (event) => {
+                // If it times out without hearing anything, keep listening without crashing the flow
+                if (event.error === 'no-speech' && isSessionActive) {
+                    autoListenTrigger();
+                } else {
+                    console.error("Speech Recognition System Error: ", event.error);
+                }
+            };
+
+            recognition.onend = () => {
+                // When single-phrase listening terminates cleanly:
+                const spokenOutput = liveTranscript.innerText.trim();
+                if (spokenOutput && spokenOutput !== "..." && isSessionActive) {
+                    processUserUtterance(spokenOutput);
+                } else if (isSessionActive) {
+                    // Fallback retry if no readable text was established
+                    autoListenTrigger();
+                }
+            };
+        }
+
+        function autoListenTrigger() {
+            if (!isSessionActive || !recognition) return;
+            try {
+                recognition.start();
+            } catch(e) {
+                // Prevent concurrent start conflicts smoothly
+            }
+        }
+
+        async function processUserUtterance(text) {
+            appendChatMessage('You', text);
+            conversationHistory.push({ role: "user", content: text });
+            updateStatus('thinking', 'Processing response...');
+
+            const apiKey = apiKeyInput.value.trim();
+            
+            try {
+                const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${apiKey}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        model: "llama-3.1-8b-instant",
+                        messages: conversationHistory,
+                        temperature: 0.2, // Lower temperature to increase factual data tracking discipline
+                        max_tokens: 150
+                    })
+                });
+
+                const data = await response.json();
+                let aiReply = data.choices[0].message.content.trim();
+                
+                // Execute administrative background notes adjustments
+                await updateRunningNotes(text);
+
+                if (aiReply.includes('[SESSION_COMPLETE]')) {
+                    aiReply = aiReply.replace('[SESSION_COMPLETE]', '').trim();
+                    appendChatMessage('Agent', aiReply);
+                    speakText(aiReply, () => {
+                        terminateAndFinalizeSession();
+                    });
+                } else {
+                    appendChatMessage('Agent', aiReply);
+                    conversationHistory.push({ role: "assistant", content: aiReply });
+                    speakText(aiReply);
+                }
+
+            } catch (error) {
+                console.error("Cloud LLM Pipeline tracking failure: ", error);
+                updateStatus('active', 'Error encountered. Re-engaging mic...');
+                autoListenTrigger();
+            }
+        }
+
+        async function updateRunningNotes(lastUserInput) {
+            const apiKey = apiKeyInput.value.trim();
+            const extractionPrompt = `You are a data extraction processor. Your targets to extract are: [${targetQuestions.value}].
+            Current continuous summary log: "${runningNotes}".
+            Latest user string input entry: "${lastUserInput}".
+            
+            Synthesize the updated log tracking data cleanly. If the user provided new answers to targets, document them specifically. Do not repeat facts. Avoid rambling.`;
+
+            try {
+                const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${apiKey}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        model: "llama-3.1-8b-instant",
+                        messages: [{ role: "user", content: extractionPrompt }],
+                        temperature: 0.1
+                    })
+                });
+                const data = await response.json();
+                runningNotes = data.choices[0].message.content.trim();
+            } catch(e) {
+                console.error("Administrative note logs compilation error: ", e);
+            }
+        }
+
+        function speakText(text, onCompleteCallback) {
+            updateStatus('speaking', 'Agent speaking...');
+            liveTranscript.innerText = "";
+            
+            const utterance = new SpeechSynthesisUtterance(text);
+            const voices = SpeechSynthesis.getVoices();
+            const preferredVoice = voices.find(v => v.lang.startsWith('en-') && (v.name.includes('Google') || v.name.includes('Samantha') || v.name.includes('Natural')));
+            if (preferredVoice) utterance.voice = preferredVoice;
+
+            utterance.onend = () => {
+                if (onCompleteCallback) {
+                    onCompleteCallback();
+                } else if (isSessionActive) {
+                    // THE CRITICAL FLIP: Only start listening AFTER the speaker has finished completely
+                    autoListenTrigger();
+                }
+            };
+
+            SpeechSynthesis.speak(utterance);
+        }
+
+        function terminateAndFinalizeSession() {
+            isSessionActive = false;
+            try { recognition.abort(); } catch(e){}
+            
+            updateStatus('complete', 'Completed');
+            actionBtn.className = "bg-slate-200 text-slate-400 font-semibold px-8 py-4 rounded-full flex items-center gap-3 text-lg cursor-not-allowed";
+            btnIcon.innerText = '🔒';
+            btnText.innerText = 'Closed';
+            liveTranscript.innerText = "";
+
+            finalNotesBox.value = `==================================================\n   CONVERSATIONAL DATA RECORD ACQUIRED CLEANLY   \n==================================================\n\n${runningNotes}\n\n--------------------------------------------------\nProcess Sequence Finalized.`;
+        }
+
+        function appendChatMessage(sender, text) {
+            const msgRow = document.createElement('div');
+            msgRow.className = "mb-2";
+            if (sender === 'Agent') {
+                msgRow.innerHTML = `<span class="font-bold text-indigo-600">Agent:</span> <span class="text-slate-700">${text}</span>`;
+            } else {
+                msgRow.innerHTML = `<span class="font-bold text-emerald-600">You:</span> <span class="text-slate-700">${text}</span>`;
+            }
+            chatDisplay.appendChild(msgRow);
+            chatDisplay.scrollTop = chatDisplay.scrollHeight;
+        }
+
+        function updateStatus(state, label) {
+            statusText.innerText = label;
+            statusDot.className = "w-2 h-2 rounded-full block";
+            switch (state) {
+                case 'listening': statusDot.classList.add('bg-red-500'); break;
+                case 'thinking': statusDot.classList.add('bg-blue-500'); break;
+                case 'speaking': statusDot.classList.add('bg-indigo-500'); break;
+                case 'complete': statusDot.classList.add('bg-slate-700'); break;
+                default: statusDot.classList.add('bg-slate-400');
+            }
+        }
+    </script>
+</body>
+</html>
